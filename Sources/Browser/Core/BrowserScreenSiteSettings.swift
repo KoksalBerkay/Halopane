@@ -7,13 +7,27 @@ import UIKit
 import WebKit
 import simd
 
-// Per-site settings: website layout and ad blocking.
+// Per-site settings: website layout, Safari user agent and ad blocking.
 extension BrowserScreen {
     var websiteLayoutMenuTitle: String {
         if cloudManagesWebsiteLayout(web.url) {
             return "Layout managed by cloud profile"
         }
         return websiteLayout(web.url).toggleTitle
+    }
+
+    var safariMenuTitle: String {
+        usesSafari(web.url) ? "Stop identifying as Safari" : "Identify as Safari"
+    }
+
+    func usesSafari(_ url: URL?) -> Bool {
+        XWebCompatibility.usesSafari(url, override: siteDomain(url).flatMap { workspace.safariSites[$0] })
+    }
+
+    // Sets the user agent for a page about to load, using the per-site choice if there is one.
+    func prepareUserAgent(_ view: WKWebView, url: URL?) {
+        let override = siteDomain(url).flatMap { workspace.safariSites[$0] }
+        XWebCompatibility.prepare(view, url: url, desktop: websiteLayout(url) == .desktop, override: override)
     }
 
     var adsEnabledForCurrentSite: Bool {
@@ -54,6 +68,23 @@ extension BrowserScreen {
         }
         workspace.desktopSites[host] = websiteLayout(web.url) != .desktop
         UserDefaults.standard.set(workspace.desktopSites, forKey: "viture.browser.desktopSites")
+        reloadPage()
+    }
+
+    // Saves only choices that differ from the built-in list, so list updates still reach other sites.
+    func toggleSiteSafari() {
+        guard let url = web.url, BrowserDestination.isWebURL(url), let host = siteDomain(url) else {
+            showNotice("Open a site first.")
+            return
+        }
+        let wanted = !usesSafari(url)
+        workspace.safariSites[host] = nil
+        if XWebCompatibility.usesSafari(url) != wanted {
+            workspace.safariSites[host] = wanted
+        }
+        UserDefaults.standard.set(workspace.safariSites, forKey: "viture.browser.safariSites")
+        prepareUserAgent(web, url: url)
+        showNotice(wanted ? "This site now sees Safari." : "This site now sees the Halopane browser.")
         reloadPage()
     }
 

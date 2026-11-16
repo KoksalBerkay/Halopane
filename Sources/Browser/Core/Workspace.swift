@@ -156,6 +156,9 @@ final class Workspace: ObservableObject {
     /// Per-site desktop or mobile layout choices.
     var desktopSites =
         UserDefaults.standard.dictionary(forKey: "viture.browser.desktopSites") as? [String: Bool] ?? [:]
+    /// Per-site choices to send, or not send, the Safari user agent. Sites not listed use the built-in list.
+    var safariSites =
+        UserDefaults.standard.dictionary(forKey: "viture.browser.safariSites") as? [String: Bool] ?? [:]
 
     // MARK: Shared data
 

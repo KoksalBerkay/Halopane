@@ -53,6 +53,12 @@ enum LogicTests {
         check(agent("https://www.youtube.com/", false) == nil, "YouTube keeps the WebView agent")
         check(agent("https://notpluto.tv/", false) == nil, "a lookalike domain is not matched")
         check(agent("http://pluto.tv/", false) == nil, "plain http is not matched")
+        let chosen = { (address: String, override: Bool) in
+            XWebCompatibility.userAgent(for: URL(string: address), desktop: false, os: os, override: override)
+        }
+        check(chosen("https://example.com/", true)?.contains("Safari/") == true, "a user can turn Safari on")
+        check(chosen("https://pluto.tv/", false) == nil, "a user can turn Safari off for a listed site")
+        check(chosen("file:///tmp/a.html", true) == nil, "local files never get it")
     }
 
     // Typed text becomes an https address when it looks like one, otherwise a search.

@@ -109,6 +109,8 @@ extension BrowserScreen {
             owner.closePanel(self)
         case .desktop:
             toggleSiteDesktop()
+        case .safari:
+            toggleSiteSafari()
         case .ads:
             toggleSiteAds()
         case .undo:

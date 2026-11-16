@@ -164,7 +164,7 @@ final class BrowserChromeView: UIView {
         case 1:
             var entries = [
                 "Place screen here", browser === browser.owner ? "Go Home" : "Close screen",
-                browser.websiteLayoutMenuTitle,
+                browser.websiteLayoutMenuTitle, browser.safariMenuTitle,
                 browser.adsEnabledForCurrentSite ? "Turn off ad blocking" : "Turn on ad blocking",
                 "Add to Home", "History", "Settings on iPhone", "Open Files", "Open Photos"
             ]

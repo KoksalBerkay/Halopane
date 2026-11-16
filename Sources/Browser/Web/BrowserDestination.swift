@@ -123,7 +123,7 @@ enum BrowserDestination {
 /// Sites that only work when the browser says it is Safari. X sends other iOS
 /// WebViews to a Safari-only handoff. Streaming players pick a stream and DRM
 /// path from the browser name, and without "Safari" the video never starts.
-/// Other sites keep the plain WebView user agent.
+/// Other sites keep the plain WebView user agent unless the user turns it on.
 enum XWebCompatibility {
     private static let hosts: Set<String> = [
         "x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"
@@ -143,11 +143,26 @@ enum XWebCompatibility {
         hosts.contains(host)
     }
 
-    static func userAgent(for url: URL?, desktop: Bool, os: OperatingSystemVersion) -> String? {
-        guard let url, url.scheme?.lowercased() == "https", url.user == nil, url.password == nil,
-            url.port == nil || url.port == 443, let host = url.host?.lowercased(),
-            hosts.contains(host) || isStreaming(host)
+    /// Whether a site is sent the Safari user agent. A per-site choice wins over the built-in list.
+    static func usesSafari(_ url: URL?, override: Bool? = nil) -> Bool {
+        guard let url, BrowserDestination.isWebURL(url), let host = url.host?.lowercased() else {
+            return false
+        }
+        if let override {
+            return override
+        }
+        guard url.scheme?.lowercased() == "https", url.user == nil, url.password == nil,
+            url.port == nil || url.port == 443
         else {
+            return false
+        }
+        return hosts.contains(host) || isStreaming(host)
+    }
+
+    static func userAgent(
+        for url: URL?, desktop: Bool, os: OperatingSystemVersion, override: Bool? = nil
+    ) -> String? {
+        guard usesSafari(url, override: override) else {
             return nil
         }
         let version = "\(os.majorVersion).\(os.minorVersion)"
@@ -167,10 +182,10 @@ enum XWebCompatibility {
     }
 
     static func prepare(
-        _ webView: WKWebView, url: URL?, desktop: Bool,
+        _ webView: WKWebView, url: URL?, desktop: Bool, override: Bool? = nil,
         os: OperatingSystemVersion = ProcessInfo.processInfo.operatingSystemVersion
     ) {
-        let agent = userAgent(for: url, desktop: desktop, os: os)
+        let agent = userAgent(for: url, desktop: desktop, os: os, override: override)
         if webView.customUserAgent != agent {
             webView.customUserAgent = agent
         }

@@ -207,7 +207,7 @@ extension BrowserScreen {
             let url = navigationAction.request.url
             let layout = websiteLayout(url)
             preferences.preferredContentMode = layout.contentMode
-            XWebCompatibility.prepare(webView, url: url, desktop: layout == .desktop)
+            prepareUserAgent(webView, url: url)
             let service = CloudGamingService.page(url)
             let mode = preferences.preferredContentMode
             let modeName = mode == .desktop ? "desktop" : mode == .mobile ? "mobile" : "recommended"

@@ -8,7 +8,7 @@ public enum BrowserChromeLayout {
     }
 
     public enum MoreRow: Int, CaseIterable {
-        case place, close, desktop, ads, addToHome, history, settings, openFiles, openPhotos, undo
+        case place, close, desktop, safari, ads, addToHome, history, settings, openFiles, openPhotos, undo
     }
     public static let homeSearch = CGRect(x: 180, y: 28, width: 640, height: 72)
     /// The Home page enlarges its search bar by this much under the pointer (`#search.hover` in home.html).
