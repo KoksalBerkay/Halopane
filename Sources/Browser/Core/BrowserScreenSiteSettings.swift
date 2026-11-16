@@ -32,16 +32,15 @@ extension BrowserScreen {
         prepareMediaSource(view, macSafari: desktop && usesSafari(url))
     }
 
-    // Experimental: a page shown as Mac Safari gets MediaSource, as a Mac would have.
-    // The report shows whether WebKit picks the switch up for the next page.
+    // A page shown as Mac Safari gets MediaSource, as a Mac would have. WebKit
+    // picks the switch up for the next page. EME is set again in case the change resets it.
     private func prepareMediaSource(_ view: WKWebView, macSafari: Bool) {
-        guard workspace.mediaSourceExperiment else {
-            return
-        }
         let preferences = view === web ? webPreferences : view.configuration.preferences
-        let result = VXRSetWebFeature(preferences, "MediaSourceEnabled", macSafari)
+        let wanted = macSafari && workspace.desktopMediaSource
+        let result = VXRSetWebFeature(preferences, "MediaSourceEnabled", wanted)
+        let encryptedMedia = VXREnableEncryptedMedia(preferences)
         if view === web {
-            mediaSourceStatus = "Set \(macSafari ? "on" : "off") for next page: \(result)"
+            mediaSourceStatus = "Set \(wanted ? "on" : "off") for next page: \(result); \(encryptedMedia)"
         }
     }
 

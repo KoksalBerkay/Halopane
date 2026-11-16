@@ -155,9 +155,7 @@ extension BrowserShell {
                     Text($0.rawValue).tag($0)
                 }
             }
-            Toggle("MediaSource for streaming (experimental)", isOn: $workspace.mediaSourceExperiment)
-            Text("For Netflix and HBO Max as desktop sites. Close and reopen the app after changing it.")
-                .font(.footnote).foregroundStyle(.secondary)
+            Toggle("MediaSource for desktop Safari sites", isOn: $workspace.desktopMediaSource)
             Picker("Xbox Cloud Gaming profile", selection: $owner.xboxCloudProfile) {
                 ForEach(CloudGamingProfile.allCases) {
                     Text($0.label).tag($0)
@@ -190,7 +188,8 @@ extension BrowserShell {
         } footer: {
             Text(
                 """
-                For testing and development. Spatial decoder picks how Spatial Player decodes stereo video. The cloud \
+                For testing and development. Spatial decoder picks how Spatial Player decodes stereo video. \
+                MediaSource lets desktop players such as Netflix stream; it applies on the next page load. The cloud \
                 gaming profiles choose which version of each service loads; Web app supports paired controllers. \
                 The lab compares rendering paths and input delivery.
                 """)
