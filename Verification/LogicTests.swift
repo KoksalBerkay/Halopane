@@ -50,6 +50,9 @@ enum LogicTests {
         check(agent("https://pluto.tv/it/shows/1", false)?.contains("Safari/") == true, "Pluto gets Safari")
         check(agent("https://play.hbomax.com/", true)?.contains("Macintosh") == true, "HBO desktop gets Mac Safari")
         check(agent("https://x.com/home", false)?.contains("iPhone") == true, "X still gets iPhone Safari")
+        check(
+            BrowserDestination.websiteLayout(URL(string: "https://www.netflix.com/"), overrides: [:], preferDesktop: false)
+                == .desktop, "Netflix opens as the desktop site")
         check(agent("https://www.youtube.com/", false) == nil, "YouTube keeps the WebView agent")
         check(agent("https://notpluto.tv/", false) == nil, "a lookalike domain is not matched")
         check(agent("http://pluto.tv/", false) == nil, "plain http is not matched")

@@ -242,7 +242,10 @@ extension BrowserDestination {
     }
 
     // Site behavior is independent of whether a site has a Home shortcut.
-    static let desktopProfileHosts: Set<String> = ["xbox.com", "play.geforcenow.com", "luna.amazon.com"]
+    // Netflix's mobile site sends iPhones to the app; its desktop site plays in the browser.
+    static let desktopProfileHosts: Set<String> = [
+        "xbox.com", "play.geforcenow.com", "luna.amazon.com", "netflix.com"
+    ]
 }
 
 /// Names a site in a shared report without revealing where the user browses.
