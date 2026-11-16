@@ -18,12 +18,13 @@ enum LogicTests {
         checkSearchURLs()
         checkWebURLs()
         checkPhoneSignIn()
+        checkSafariUserAgent()
         checkReportSites()
         if failures > 0 {
             print("\(failures) logic check(s) failed")
             exit(1)
         }
-        print("Logic checks passed: address resolution, search URLs, web URLs and phone sign-in pages, report sites")
+        print("Logic checks passed: address resolution, search URLs, web URLs and phone sign-in pages, Safari user agent, report sites")
     }
 
     // Reports name only well-known services, never other sites.
@@ -32,10 +33,26 @@ enum LogicTests {
             ReportSite.label(address.flatMap { URL(string: $0) })
         }
         check(label("https://www.youtube.com/watch?v=abc") == "youtube.com", "YouTube is named")
+        check(label("https://play.hbomax.com/") == "play.hbomax.com", "HBO Max is named")
+        check(label("https://www.netflix.com/") == "netflix.com", "Netflix is named")
         check(label("https://mybank.example/") == "other website", "other sites are not named")
         check(label("https://youtube.com.example/") == "other website", "a lookalike domain is not named")
         check(label("file:///private/var/doc.pdf") == "local page", "local files are not named")
         check(label(nil) == "Home", "no address reads as Home")
+    }
+
+    // X and streaming sites get the Safari user agent; other sites keep WebKit's own.
+    static func checkSafariUserAgent() {
+        let os = OperatingSystemVersion(majorVersion: 27, minorVersion: 2, patchVersion: 1)
+        let agent = { (address: String, desktop: Bool) in
+            XWebCompatibility.userAgent(for: URL(string: address), desktop: desktop, os: os)
+        }
+        check(agent("https://pluto.tv/it/shows/1", false)?.contains("Safari/") == true, "Pluto gets Safari")
+        check(agent("https://play.hbomax.com/", true)?.contains("Macintosh") == true, "HBO desktop gets Mac Safari")
+        check(agent("https://x.com/home", false)?.contains("iPhone") == true, "X still gets iPhone Safari")
+        check(agent("https://www.youtube.com/", false) == nil, "YouTube keeps the WebView agent")
+        check(agent("https://notpluto.tv/", false) == nil, "a lookalike domain is not matched")
+        check(agent("http://pluto.tv/", false) == nil, "plain http is not matched")
     }
 
     // Typed text becomes an https address when it looks like one, otherwise a search.

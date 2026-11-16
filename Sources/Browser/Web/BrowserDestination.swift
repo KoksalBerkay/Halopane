@@ -120,12 +120,24 @@ enum BrowserDestination {
     }
 }
 
-/// X sends iOS WebViews without a Safari browser token to a Safari-only
-/// handoff instead of serving the page. Use the Safari UA shape only here.
+/// Sites that only work when the browser says it is Safari. X sends other iOS
+/// WebViews to a Safari-only handoff. Streaming players pick a stream and DRM
+/// path from the browser name, and without "Safari" the video never starts.
+/// Other sites keep the plain WebView user agent.
 enum XWebCompatibility {
     private static let hosts: Set<String> = [
         "x.com", "www.x.com", "mobile.x.com", "twitter.com", "www.twitter.com", "mobile.twitter.com"
     ]
+    // Matched with their subdomains.
+    private static let streamingDomains: Set<String> = [
+        "pluto.tv", "hbomax.com", "max.com", "plex.tv", "tubi.tv", "disneyplus.com", "primevideo.com",
+        "paramountplus.com", "peacocktv.com", "hulu.com", "netflix.com", "crunchyroll.com", "mubi.com",
+        "dazn.com", "skyshowtime.com", "tv.apple.com"
+    ]
+
+    static func isStreaming(_ host: String) -> Bool {
+        streamingDomains.contains { host == $0 || host.hasSuffix("." + $0) }
+    }
 
     static func isX(_ host: String) -> Bool {
         hosts.contains(host)
@@ -133,7 +145,8 @@ enum XWebCompatibility {
 
     static func userAgent(for url: URL?, desktop: Bool, os: OperatingSystemVersion) -> String? {
         guard let url, url.scheme?.lowercased() == "https", url.user == nil, url.password == nil,
-            url.port == nil || url.port == 443, let host = url.host?.lowercased(), hosts.contains(host)
+            url.port == nil || url.port == 443, let host = url.host?.lowercased(),
+            hosts.contains(host) || isStreaming(host)
         else {
             return nil
         }
@@ -236,7 +249,7 @@ enum ReportSite {
         }
         let known =
             services.contains { host == $0 || host.hasSuffix("." + $0) }
-            || XWebCompatibility.isX(host)
+            || XWebCompatibility.isStreaming(host) || XWebCompatibility.isX(host)
             || BrowserDestination.desktopProfileHosts.contains(host)
         return known ? host : "other website"
     }
