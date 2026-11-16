@@ -155,6 +155,9 @@ extension BrowserShell {
                     Text($0.rawValue).tag($0)
                 }
             }
+            Toggle("MediaSource for streaming (experimental)", isOn: $workspace.mediaSourceExperiment)
+            Text("For Netflix and HBO Max as desktop sites. Close and reopen the app after changing it.")
+                .font(.footnote).foregroundStyle(.secondary)
             Picker("Xbox Cloud Gaming profile", selection: $owner.xboxCloudProfile) {
                 ForEach(CloudGamingProfile.allCases) {
                     Text($0.label).tag($0)

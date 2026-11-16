@@ -237,6 +237,8 @@ extension BrowserScreen {
                     mse: typeof window.MediaSource === 'function',
                     managedMse: typeof window.ManagedMediaSource === 'function'
                 },
+                agent: (navigator.userAgent.includes('Macintosh') ? 'mac' : 'mobile') +
+                    (navigator.userAgent.includes(' Safari/') ? ' safari' : ''),
                 ...(window.__vxrMetrics ? window.__vxrMetrics() : {
                     scrollY: scrollY,
                     video: [...document.querySelectorAll('video')].map(v => ({

@@ -167,6 +167,7 @@ extension BrowserScreen {
             Source site: \(reportSiteLabel)
             \(diagnostics.videoEvidence)
             Encrypted media: \(encryptedMediaStatus)
+            MediaSource experiment: \(mediaSourceStatus)
             Portal: \(portalStatus)
             \(metrics)
             Page telemetry: \(frameStats.sourceMetrics)

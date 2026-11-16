@@ -27,7 +27,22 @@ extension BrowserScreen {
     // Sets the user agent for a page about to load, using the per-site choice if there is one.
     func prepareUserAgent(_ view: WKWebView, url: URL?) {
         let override = siteDomain(url).flatMap { workspace.safariSites[$0] }
-        XWebCompatibility.prepare(view, url: url, desktop: websiteLayout(url) == .desktop, override: override)
+        let desktop = websiteLayout(url) == .desktop
+        XWebCompatibility.prepare(view, url: url, desktop: desktop, override: override)
+        prepareMediaSource(view, macSafari: desktop && usesSafari(url))
+    }
+
+    // Experimental: a page shown as Mac Safari gets MediaSource, as a Mac would have.
+    // The report shows whether WebKit picks the switch up for the next page.
+    private func prepareMediaSource(_ view: WKWebView, macSafari: Bool) {
+        guard workspace.mediaSourceExperiment else {
+            return
+        }
+        let preferences = view === web ? webPreferences : view.configuration.preferences
+        let result = VXRSetWebFeature(preferences, "MediaSourceEnabled", macSafari)
+        if view === web {
+            mediaSourceStatus = "Set \(macSafari ? "on" : "off") for next page: \(result)"
+        }
     }
 
     var adsEnabledForCurrentSite: Bool {

@@ -214,6 +214,8 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
     let webPreferences = WKPreferences()
     /// Whether WebKit's encrypted media (FairPlay) APIs were switched on for this screen.
     private(set) var encryptedMediaStatus = "Not set"
+    /// The MediaSource experiment's last switch, for the diagnostics report.
+    var mediaSourceStatus = "Experiment off"
     let web: WKWebView
     @Published var isLoadingPage = false
     @Published var browserNotice = ""
@@ -253,12 +255,19 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
         configuration.preferences.isTextInteractionEnabled = false
         // Must run before the web view is created; WebKit copies the preferences then.
         let encryptedMedia = VXREnableEncryptedMedia(webPreferences)
+        let mediaSourceAtStart = workspace.mediaSourceExperiment
+        if mediaSourceAtStart {
+            _ = VXRSetWebFeature(webPreferences, "MediaSourceEnabled", true)
+        }
         media.configure(in: configuration)
         let scripts = Self.browserScripts(media: media, scrollWorld: scrollWorld)
         scripts.forEach(configuration.userContentController.addUserScript)
         web = WKWebView(frame: CGRect(x: 0, y: 0, width: 1000, height: 625), configuration: configuration)
         super.init()
         encryptedMediaStatus = encryptedMedia
+        if mediaSourceAtStart {
+            mediaSourceStatus = "On when the screen was created"
+        }
         if owner == nil {
             workspace.primary = self
             // Views observe the first screen. Keep them updating when shared state changes.

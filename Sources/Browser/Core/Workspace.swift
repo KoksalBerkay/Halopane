@@ -128,6 +128,13 @@ final class Workspace: ObservableObject {
             UserDefaults.standard.set(preferDesktop, forKey: "viture.browser.desktop")
         }
     }
+    /// Experimental: turn on MediaSource, which iPhone WebKit leaves off. Desktop Safari
+    /// players (Netflix, HBO Max) need it. Applies to screens opened after the change.
+    @Published var mediaSourceExperiment = UserDefaults.standard.bool(forKey: "viture.browser.mediaSource") {
+        didSet {
+            UserDefaults.standard.set(mediaSourceExperiment, forKey: "viture.browser.mediaSource")
+        }
+    }
     @Published var searchEngine =
         BrowserSearchEngine(
             rawValue: UserDefaults.standard.string(
