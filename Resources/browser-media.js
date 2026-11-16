@@ -184,5 +184,17 @@
             element:!!document.fullscreenElement, native:!!e.target?.webkitDisplayingFullscreen,
             mode:e.target?.webkitPresentationMode||''}),true);
     }
+    // DRM and error events for the playback timeline. Only names and codes, never key data.
+    const keyEvents = ['encrypted', 'waitingforkey', 'webkitneedkey', 'webkitkeyerror', 'error', 'stalled', 'emptied'];
+    for (const event of keyEvents) {
+        document.addEventListener(event,e => {
+            if (!(e.target instanceof HTMLMediaElement)) {
+                return;
+            }
+            send({kind:'drm',event,at:Date.now(),ready:e.target.readyState,
+                  initDataType:String(e.initDataType || '').slice(0,20),
+                  error:e.target.error?.code ?? 0,keys:!!e.target.mediaKeys || !!e.target.webkitKeys});
+        },true);
+    }
     setInterval(report,350);
 })();

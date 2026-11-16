@@ -382,6 +382,8 @@ final class BrowserMedia: NSObject, ObservableObject, WKScriptMessageHandler {
             handleCinemaSignal(kind, frameKey: key)
         case "playback":
             handlePlayback(body, frameKey: key)
+        case "drm":
+            handleKeyEvent(body)
         case "empty":
             sources[key] = nil
             refresh()
@@ -463,6 +465,25 @@ final class BrowserMedia: NSObject, ObservableObject, WKScriptMessageHandler {
     }
 
     // Play, pause and volume events. Only the selected video decides who owns the audio.
+    private func handleKeyEvent(_ body: [String: Any]) {
+        guard let event = body["event"] as? String, event.count < 30 else {
+            return
+        }
+        let ready = body["ready"] as? Int ?? 0
+        let error = body["error"] as? Int ?? 0
+        let keys = body["keys"] as? Bool == true
+        let type = String((body["initDataType"] as? String ?? "").prefix(20))
+        let timestamp = (body["at"] as? Double ?? Date().timeIntervalSince1970 * 1000) / 1000
+        var line = "\(event), ready=\(ready), keys=\(keys ? "set" : "none")"
+        if !type.isEmpty {
+            line += ", initData=\(type)"
+        }
+        if error != 0 {
+            line += ", error=\(error)"
+        }
+        trace(line, time: timestamp)
+    }
+
     private func handlePlayback(_ body: [String: Any], frameKey key: String) {
         guard let event = body["event"] as? String,
             ["play", "playing", "pause", "waiting", "volumechange", "visibilitychange"].contains(event),
