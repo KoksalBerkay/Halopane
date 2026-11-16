@@ -180,6 +180,7 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
     @Published var phoneEditor: PhoneEditor?
     @Published var phoneEditorFocusRevision = 0
     static let phoneEditorWorld = WKContentWorld.world(name: "ViturePhoneEditor")
+    static let selectPickerWorld = WKContentWorld.world(name: "VitureSelectPicker")
     var editorWorld: WKContentWorld { Self.phoneEditorWorld }
     /// A synthetic tap or swipe waiting in the shared tap queue.
     struct QueuedTap {
@@ -211,6 +212,8 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
     @Published var portalStatus = "Not attempted"
     let media = BrowserMedia()
     let webPreferences = WKPreferences()
+    /// Whether WebKit's encrypted media (FairPlay) APIs were switched on for this screen.
+    private(set) var encryptedMediaStatus = "Not set"
     let web: WKWebView
     @Published var isLoadingPage = false
     @Published var browserNotice = ""
@@ -248,11 +251,14 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
         configuration.mediaTypesRequiringUserActionForPlayback = []
         configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
         configuration.preferences.isTextInteractionEnabled = false
+        // Must run before the web view is created; WebKit copies the preferences then.
+        let encryptedMedia = VXREnableEncryptedMedia(webPreferences)
         media.configure(in: configuration)
         let scripts = Self.browserScripts(media: media, scrollWorld: scrollWorld)
         scripts.forEach(configuration.userContentController.addUserScript)
         web = WKWebView(frame: CGRect(x: 0, y: 0, width: 1000, height: 625), configuration: configuration)
         super.init()
+        encryptedMediaStatus = encryptedMedia
         if owner == nil {
             workspace.primary = self
             // Views observe the first screen. Keep them updating when shared state changes.

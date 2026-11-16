@@ -44,3 +44,37 @@ UIView *VXRCreateWebPortal(UIView *source, NSString **detail) {
         return nil;
     }
 }
+
+// Turns on WebKit's modern and legacy EME, which FairPlay sites use. Returns
+// each feature's state before and after, for the diagnostics report.
+NSString *VXREnableEncryptedMedia(WKPreferences *preferences) {
+    @try {
+        SEL list = NSSelectorFromString(@"_features");
+        SEL set = NSSelectorFromString(@"_setEnabled:forFeature:");
+        SEL get = NSSelectorFromString(@"_isEnabledForFeature:");
+        if (![WKPreferences respondsToSelector:list] || ![preferences respondsToSelector:set] ||
+            ![preferences respondsToSelector:get]) {
+            return @"WebKit feature switches unavailable";
+        }
+        NSArray *features = ((id (*)(id, SEL))objc_msgSend)([WKPreferences class], list);
+        NSSet *wanted = [NSSet setWithArray:@[ @"EncryptedMediaAPIEnabled", @"LegacyEncryptedMediaAPIEnabled" ]];
+        NSMutableArray<NSString *> *parts = [NSMutableArray array];
+        for (id feature in features) {
+            id key = [feature valueForKey:@"key"];
+            if (![key isKindOfClass:[NSString class]] || ![wanted containsObject:key]) {
+                continue;
+            }
+            BOOL before = ((BOOL (*)(id, SEL, id))objc_msgSend)(preferences, get, feature);
+            ((void (*)(id, SEL, BOOL, id))objc_msgSend)(preferences, set, YES, feature);
+            BOOL after = ((BOOL (*)(id, SEL, id))objc_msgSend)(preferences, get, feature);
+            [parts addObject:[NSString stringWithFormat:@"%@ %@ to %@", key, before ? @"on" : @"off",
+                                                        after ? @"on" : @"off"]];
+        }
+        if (parts.count == 0) {
+            return @"EME features not found in this WebKit";
+        }
+        return [parts componentsJoinedByString:@", "];
+    } @catch (NSException *exception) {
+        return [NSString stringWithFormat:@"EME switch exception: %@", exception.reason];
+    }
+}

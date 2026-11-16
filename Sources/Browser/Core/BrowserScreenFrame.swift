@@ -230,6 +230,13 @@ extension BrowserScreen {
                 viewportScale: visualViewport?.scale,
                 innerWidth: innerWidth,
                 layoutWidth: document.documentElement.clientWidth,
+                eme: {
+                    modern: typeof navigator.requestMediaKeySystemAccess === 'function',
+                    legacy: typeof window.WebKitMediaKeys === 'function',
+                    fairPlay: !!window.WebKitMediaKeys?.isTypeSupported?.('com.apple.fps.1_0', 'video/mp4'),
+                    mse: typeof window.MediaSource === 'function',
+                    managedMse: typeof window.ManagedMediaSource === 'function'
+                },
                 ...(window.__vxrMetrics ? window.__vxrMetrics() : {
                     scrollY: scrollY,
                     video: [...document.querySelectorAll('video')].map(v => ({

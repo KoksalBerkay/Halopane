@@ -166,6 +166,7 @@ extension BrowserScreen {
             Website layout requested: \(workspace.preferDesktop ? "desktop":"recommended")
             Source site: \(reportSiteLabel)
             \(diagnostics.videoEvidence)
+            Encrypted media: \(encryptedMediaStatus)
             Portal: \(portalStatus)
             \(metrics)
             Page telemetry: \(frameStats.sourceMetrics)
