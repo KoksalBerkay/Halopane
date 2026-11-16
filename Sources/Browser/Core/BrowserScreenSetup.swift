@@ -200,7 +200,19 @@ extension BrowserScreen {
         ]
     }
 
+    // Draws <select> options in the page, since the native iOS menu ignores the pointer.
+    private static func selectPickerScripts() -> [WKUserScript] {
+        guard let url = Bundle.main.url(forResource: "select-picker", withExtension: "js"),
+            let source = try? String(contentsOf: url, encoding: .utf8)
+        else {
+            return []
+        }
+        return [
+            WKUserScript(source: source, injectionTime: .atDocumentStart, forMainFrameOnly: false, in: selectPickerWorld)
+        ]
+    }
+
     static func browserScripts(media: BrowserMedia, scrollWorld: WKContentWorld) -> [WKUserScript] {
-        media.makeUserScripts() + trackpadScripts(in: scrollWorld) + phoneEditorScripts()
+        media.makeUserScripts() + trackpadScripts(in: scrollWorld) + phoneEditorScripts() + selectPickerScripts()
     }
 }
