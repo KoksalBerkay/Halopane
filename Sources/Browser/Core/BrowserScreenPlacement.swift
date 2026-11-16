@@ -83,12 +83,14 @@ extension BrowserScreen {
     }
 
     func resetPanelAnchor(reason: String = "Workspace reset", keepRecenter: Bool = false) {
-        if self === owner {
-            recordDriftEvent(reason)
-            workspace.drift.markAnchorChange()
-            if workspace.placement.isFollowing {
-                recordDriftEvent("Follow finished (reset)")
-            }
+        // Opening or closing another screen must not move the workspace.
+        guard self === owner else {
+            return
+        }
+        recordDriftEvent(reason)
+        workspace.drift.markAnchorChange()
+        if workspace.placement.isFollowing {
+            recordDriftEvent("Follow finished (reset)")
         }
         workspace.placement.waitForTracking()
         workspace.poseRecoveryPending = false
