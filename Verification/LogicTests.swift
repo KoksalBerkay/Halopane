@@ -53,6 +53,20 @@ enum LogicTests {
         check(
             BrowserDestination.websiteLayout(URL(string: "https://www.netflix.com/"), overrides: [:], preferDesktop: false)
                 == .desktop, "Netflix opens as the desktop site")
+        let layout = { (address: String) in
+            BrowserDestination.websiteLayout(URL(string: address), overrides: [:], preferDesktop: false)
+        }
+        for address in ["https://www.disneyplus.com/", "https://www.hulu.com/", "https://www.primevideo.com/",
+            "https://www.peacocktv.com/"]
+        {
+            check(layout(address) == .desktop, "\(address) opens as the desktop site")
+        }
+        check(layout("https://pluto.tv/") == .recommended, "Pluto keeps the mobile route")
+        check(layout("https://play.hbomax.com/") == .recommended, "HBO Max keeps the mobile route for now")
+        check(
+            BrowserDestination.websiteLayout(
+                URL(string: "https://www.disneyplus.com/"), overrides: ["disneyplus.com": false], preferDesktop: false)
+                == .mobile, "a saved choice wins over the default")
         check(agent("https://www.youtube.com/", false) == nil, "YouTube keeps the WebView agent")
         check(agent("https://notpluto.tv/", false) == nil, "a lookalike domain is not matched")
         check(agent("http://pluto.tv/", false) == nil, "plain http is not matched")

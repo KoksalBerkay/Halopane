@@ -242,9 +242,11 @@ extension BrowserDestination {
     }
 
     // Site behavior is independent of whether a site has a Home shortcut.
-    // Netflix's mobile site sends iPhones to the app; its desktop site plays in the browser.
+    // These streaming services refuse iPhone browsers and send them to their apps;
+    // their desktop sites play in the browser.
     static let desktopProfileHosts: Set<String> = [
-        "xbox.com", "play.geforcenow.com", "luna.amazon.com", "netflix.com"
+        "xbox.com", "play.geforcenow.com", "luna.amazon.com", "netflix.com", "disneyplus.com", "hulu.com",
+        "primevideo.com", "peacocktv.com"
     ]
 }
 
