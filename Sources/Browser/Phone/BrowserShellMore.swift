@@ -9,14 +9,18 @@ extension BrowserShell {
     func showMoreCommands() {
         moreTarget = browser
         moreSelection = nil
+        morePresented = true
+    }
+
+    // Worked out while the sheet draws. A list stored when the button is tapped could reach
+    // the sheet stale or empty on its first opening, leaving only Ad blocking.
+    private var moreCommands: [MoreCommand] {
         let mediaCommands: [MoreCommand] =
             browser.localFile.map { $0.kind != .document } == true ? [.viewMedia] : []
         let exits: [MoreCommand] = media.isVideoPresentation || browser.stereoPacking != nil ? [.exitVideo] : []
-        moreCommands =
-            exits + [.photos, .files] + mediaCommands + (workspace.hasUndo ? [.undo] : []) + [
-                .fixDisplay, .restartTracking
-            ] + ((owner.effectiveInput == .remote && tracking.active) ? [.aim] : []) + [.help, .settings]
-        morePresented = true
+        return exits + [.photos, .files] + mediaCommands + (workspace.hasUndo ? [.undo] : []) + [
+            .fixDisplay, .restartTracking
+        ] + ((owner.effectiveInput == .remote && tracking.active) ? [.aim] : []) + [.help, .settings]
     }
 
     var moreSheet: some View {

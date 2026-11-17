@@ -27,7 +27,6 @@ struct BrowserShell: View {
     @State private var fileError: String?
     @State var morePresented = false
     @State var moreTarget: BrowserScreen?
-    @State var moreCommands: [MoreCommand] = []
     @State var moreSelection: MoreCommand?
     @State var limitNotice = false
     @State var noticeTask: Task<Void, Never>?
