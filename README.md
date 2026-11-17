@@ -60,7 +60,7 @@ Tried a different setup? Please open an issue and say what happened, whether it 
 
 ## 📦 Install
 
-1. Get `Halopane.ipa`, or [build it from source](#-build-from-source).
+1. Download `Halopane.ipa` from the [latest release](https://github.com/KoksalBerkay/Halopane/releases/latest), or [build it from source](#-build-from-source).
 2. Import the IPA into [LiveContainer](https://github.com/LiveContainer/LiveContainer). Other sideloading tools have not been tested.
 3. In LiveContainer, open Halopane's app settings and turn on **Fix File Picker**. Without it, photos and videos from the iPhone may not open.
 4. Plug the adapter into the iPhone and the glasses into the adapter.
