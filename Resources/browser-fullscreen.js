@@ -6,14 +6,19 @@
             window.webkit.messageHandlers.vxrCinema.postMessage(null);
         }
     };
+    // Element fullscreen is off in the web view, so some calls may be missing. Add them anyway.
     const patch = (object,key,wrapper) => {
-        if (typeof object[key] !== 'function') {
-            return;
-        }
+        const original = typeof object[key] === 'function' ? object[key] : () => {};
         try {
-            Object.defineProperty(object,key,{configurable:true,writable:true,value:wrapper(object[key])});
+            Object.defineProperty(object,key,{configurable:true,writable:true,value:wrapper(original)});
         } catch {}
     };
+    // Desktop YouTube hides its fullscreen button when these are false.
+    for (const key of ['fullscreenEnabled','webkitFullscreenEnabled']) {
+        try {
+            Object.defineProperty(Document.prototype,key,{configurable:true,get: () => true});
+        } catch {}
+    }
     patch(Element.prototype,'requestFullscreen',() => function() {
         request();
         return Promise.resolve();

@@ -45,8 +45,9 @@ struct WebKitSmoke {
             let configuration = WKWebViewConfiguration()
             configuration.mediaTypesRequiringUserActionForPlayback = []
             configuration.preferences.javaScriptCanOpenWindowsAutomatically = false
+            // Match the app, which turns element fullscreen off and routes requests to Cinema.
             if #available(macOS 12.3, *) {
-                configuration.preferences.isElementFullscreenEnabled = true
+                configuration.preferences.isElementFullscreenEnabled = false
             }
             let resources = URL(fileURLWithPath: CommandLine.arguments[1]).deletingLastPathComponent()
             let observer = try! String(
@@ -222,9 +223,11 @@ struct WebKitSmoke {
                 self.web.callAsyncJavaScript(
                     """
                     const video = document.querySelector('video');
-                    const request = video.requestFullscreen || video.webkitRequestFullscreen || video.webkitRequestFullScreen;
-                    if (!request) return false;
-                    await request.call(video);
+                    // Desktop YouTube checks fullscreenEnabled and calls requestFullscreen on its player.
+                    if (!document.fullscreenEnabled || typeof video.parentElement.requestFullscreen !== 'function') {
+                        return false;
+                    }
+                    await video.parentElement.requestFullscreen();
                     return !document.fullscreenElement;
                     """, arguments: [:], in: nil, in: .page
                 ) { result in
