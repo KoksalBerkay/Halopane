@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.1 (2026-11-18)
+
+- YouTube opens as the desktop site. The mobile site kept loading posts and moving the page at the glasses' screen size. A saved choice for YouTube is kept.
+- Fullscreen on desktop YouTube opens the video in Halopane's full-screen view.
+
 ## 0.1.0 (2026-11-17)
 
 First public version.
