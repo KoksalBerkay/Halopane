@@ -67,6 +67,13 @@ enum LogicTests {
             BrowserDestination.websiteLayout(
                 URL(string: "https://www.disneyplus.com/"), overrides: ["disneyplus.com": false], preferDesktop: false)
                 == .mobile, "a saved choice wins over the default")
+        for address in ["https://www.youtube.com/", "https://m.youtube.com/", "https://youtube.com/shorts/abc"] {
+            check(layout(address) == .desktop, "YouTube opens as the desktop site: " + address)
+        }
+        check(
+            BrowserDestination.websiteLayout(
+                URL(string: "https://m.youtube.com/"), overrides: ["m.youtube.com": false], preferDesktop: false)
+                == .mobile, "an older saved mobile YouTube choice still wins")
         check(agent("https://www.youtube.com/", false) == nil, "YouTube keeps the WebView agent")
         check(agent("https://notpluto.tv/", false) == nil, "a lookalike domain is not matched")
         check(agent("http://pluto.tv/", false) == nil, "plain http is not matched")
