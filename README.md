@@ -69,7 +69,7 @@ Tried a different setup? Please open an issue and say what happened, whether it 
 ## 🚀 First five minutes
 
 1. Put the glasses on, look straight ahead and press **Recenter** on the phone.
-2. Slide one finger on the phone to move the cursor. Tap to click. Drag two fingers to scroll.
+2. Point the phone at the screen to move the cursor, like a laser pointer. Tap to click and swipe to scroll. Prefer a trackpad? Switch in **More → Settings → Input**.
 3. Pick a site from Home, or press **Keyboard** and type an address.
 4. Press **+** to add another screen, then turn your head to look at it.
 5. Press the Full Screen button to make the current screen fill your view.

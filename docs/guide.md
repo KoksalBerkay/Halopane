@@ -10,10 +10,10 @@ If the top or sides are cut off in Full Screen, open **More (⋯) → Settings �
 
 ## 📱 Move the pointer
 
-Open **More → Settings → Input** on the phone to choose a mode.
+Halopane starts in Phone aim. Open **More → Settings → Input** on the phone to choose a mode.
 
-- **Trackpad.** Slide one finger to move the pointer, tap to click and drag two fingers to scroll. Tap with two fingers for a right click on pages that handle it. Hold two fingers still to recenter.
 - **Phone aim.** Point the phone to move the pointer and tap to click. If the aim is off, use **More → Aim again**. Turn the beam off with **Laser pointer in Phone Aim** in Settings.
+- **Trackpad.** Slide one finger to move the pointer, tap to click and drag two fingers to scroll. Tap with two fingers for a right click on pages that handle it. Hold two fingers still to recenter.
 - **Gaze + tap (experimental).** Look at what you want to select, then tap the phone.
 
 ## 🖥️ Open and arrange screens

@@ -44,7 +44,7 @@ final class Workspace: ObservableObject {
     // MARK: Input and pointer
 
     @Published var input =
-        WebInput(rawValue: UserDefaults.standard.string(forKey: "viture.browser.input") ?? "") ?? .trackpad
+        WebInput(rawValue: UserDefaults.standard.string(forKey: "viture.browser.input") ?? "") ?? .remote
     {
         didSet {
             guard oldValue != input else {
