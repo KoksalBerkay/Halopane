@@ -1,7 +1,7 @@
 // iOS shows <select> options in a native UIKit menu that pointer taps from
 // the phone cannot reach. Draw the options inside the page instead.
 (() => {
-    let host = null, current = null, opened = 0, start = null;
+    let host = null, current = null, opened = 0, start = null, touched = null;
 
     const usable = select => select && !select.disabled && !select.matches(':disabled');
 
@@ -155,8 +155,14 @@
         list.querySelector('.item.on')?.scrollIntoView({block: 'nearest'});
     }
 
+    // True when our list is already open for this select, so the later steps
+    // of the same tap don't open it a second time.
+    const showing = select => current === select && performance.now() - opened < 800;
+
     // Cancelling the touch stops WebKit from focusing the select, so the
     // native menu never opens. A drag that starts on the select still scrolls.
+    // WebKit sometimes handles the tap without waiting for this, so the
+    // mousedown and focusin handlers below catch the same tap later.
     document.addEventListener('touchstart', event => {
         const touch = event.changedTouches[0];
         const select = event.isTrusted && event.touches.length === 1 ? selectFrom(event) : null;
@@ -165,6 +171,7 @@
             return;
         }
         start = {select, x: touch.clientX, y: touch.clientY};
+        touched = {select, at: performance.now()};
     }, {capture: true, passive: true});
 
     document.addEventListener('touchend', event => {
@@ -178,18 +185,41 @@
             return;
         }
         event.preventDefault();
-        open(tap.select);
+        if (!showing(tap.select)) {
+            open(tap.select);
+        }
     }, {capture: true, passive: false});
+
+    // iOS turns a tap into a mousedown before focusing. Cancelling it keeps focus away.
+    document.addEventListener('mousedown', event => {
+        const select = event.isTrusted ? selectFrom(event) : null;
+        if (!select) {
+            return;
+        }
+        event.preventDefault();
+        if (!showing(select)) {
+            open(select);
+        }
+    }, true);
 
     document.addEventListener('touchcancel', () => {
         start = null;
     }, true);
 
-    // If WebKit still focuses the select right after our picker opened, blur it
-    // so the native menu closes again.
+    // Last resort: if a tapped select still gets focus, the native menu is opening.
+    // Blurring closes it, and our list opens instead. Keyboard focus is left alone.
     document.addEventListener('focusin', event => {
-        if (current && event.target === current && performance.now() - opened < 1000) {
-            current.blur();
+        const select = event.composedPath()[0];
+        if (select?.tagName !== 'SELECT') {
+            return;
+        }
+        const tapped = touched?.select === select && performance.now() - touched.at < 1500;
+        if (!tapped && !showing(select)) {
+            return;
+        }
+        select.blur();
+        if (!showing(select) && usable(select)) {
+            open(select);
         }
     }, true);
 
