@@ -1,0 +1,9 @@
+[
+  {
+    "trigger": {
+      "url-filter": "^https://ads\\.example\\.com/",
+      "if-domain": ["example.com", "*.example.com"]
+    },
+    "action": { "type": "block" }
+  }
+]

@@ -1,0 +1,182 @@
+<!doctype html><html><head>
+<meta name="viewport" content="width=device-width,initial-scale=1"><meta charset="utf-8"><style>
+body {
+    margin: 0;
+    background: #fff;
+    color: #16212d;
+    font: 16px -apple-system, sans-serif;
+}
+header {
+    padding: 16px 24px;
+    background: #14384a;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+main {
+    padding: 16px 24px;
+}
+.tiny {
+    display: flex;
+    gap: 22px;
+}
+.tiny span {
+    border-bottom: 1px solid black;
+}
+.motion {
+    height: 12px;
+    background: #e1edf0;
+    position: relative;
+    overflow: hidden;
+}
+.bar {
+    position: absolute;
+    width: 70px;
+    height: 12px;
+    background: #ff9500;
+}
+.row {
+    padding: 16px;
+    border-bottom: 1px solid #cdd;
+}
+video {
+    width: 320px;
+    height: 180px;
+    background: black;
+    vertical-align: middle;
+}
+button, input {
+    font: 20px -apple-system;
+    padding: 10px;
+    margin: 8px;
+    border: 1px solid #789;
+}
+a {
+    color: #006cca;
+}
+canvas {
+    border: 1px solid #123;
+}
+#status {
+    font: 12px monospace;
+    overflow-wrap: anywhere;
+    max-width: 100%;
+}
+</style></head><body>
+<header><b>VITURE web rendering probe</b> · <span id="frames">frame 0</span>
+<div class="motion"><div class="bar" id="bar"></div></div></header>
+<main><div class="tiny">
+<span style="font-size:8px">8px Aa 012345</span>
+<span style="font-size:10px">10px Aa 012345</span>
+<span style="font-size:12px">12px Aa 012345</span>
+<span style="font-size:16px">16px Aa 012345</span>
+<span style="font-size:24px">24px Aa 012345</span>
+</div>
+<p>Text clarity, independent moving bar, and an ordinary unencrypted inline video.</p>
+<!-- The video, buttons and field touch with no space between them; line breaks stay inside tags. -->
+<video id="video" src="web-test.mp4" playsinline muted autoplay loop controls></video><button
+    id="count" onclick="clicks++;this.textContent='Clicks: '+clicks">Clicks: 0</button><input
+    id="entry" placeholder="Phone keyboard test" size="20"><button
+    id="activation">Activation probe (brief tone)</button>
+<p><a href="#rows">Follow this link to row section</a> · <button
+    onclick="document.getElementById('video').play()">Play video</button></p>
+<div id="status">Loading metrics...</div>
+<h2>Nested scrolling control</h2>
+<section id="inner" style="height:190px;overflow-y:auto;border:2px solid #168;overscroll-behavior:contain"></section>
+<section id="rows"></section></main>
+<script>
+let clicks = 0, frames = 0, vframes = 0, last = performance.now();
+let lastFrames = 0, lastVideoFrames = 0, rafHz = 0, videoHz = 0;
+const video = document.getElementById('video');
+// Count decoded video frames separately from page animation frames.
+if (video.requestVideoFrameCallback) {
+    const vf = () => {
+        vframes++;
+        video.requestVideoFrameCallback(vf);
+    };
+    video.requestVideoFrameCallback(vf);
+}
+function tick(t) {
+    frames++;
+    document.getElementById('frames').textContent = 'frame ' + frames;
+    document.getElementById('bar').style.left = ((t / 8) % 900) + 'px';
+    // Once a second, update the frame rates and the status line.
+    if (t - last >= 1000) {
+        rafHz = (frames - lastFrames) * 1000 / (t - last);
+        videoHz = (vframes - lastVideoFrames) * 1000 / (t - last);
+        last = t;
+        lastFrames = frames;
+        lastVideoFrames = vframes;
+        document.getElementById('status').textContent = JSON.stringify(window.__vxrMetrics());
+    }
+    requestAnimationFrame(tick);
+}
+// Read by the app's page poll for the diagnostic report.
+window.__vxrMetrics = () => ({
+    rafHz,
+    videoHz,
+    frames,
+    clicks,
+    textLength: document.getElementById('entry').value.length,
+    innerScroll: document.getElementById('inner').scrollTop,
+    scrollY,
+    videoTime: video.currentTime,
+    videoPaused: video.paused,
+    videoReady: video.readyState,
+    videoCallbackSupported: !!video.requestVideoFrameCallback,
+    videoError: video.error ? video.error.code : null,
+    encrypted: false
+});
+document.getElementById('activation').addEventListener('click', e => {
+    window.__vxrRecordActivation?.(e, {playResult: 'pending'});
+    // Start gated requests synchronously while the handler's activation context exists.
+    try {
+        video.muted = false;
+        Promise.resolve(video.play()).then(
+            () => window.__vxrRecordActivation?.(e, {playResult: 'resolved'}),
+            err => window.__vxrRecordActivation?.(e, {playResult: err.name}));
+    } catch (err) {
+        window.__vxrRecordActivation?.(e, {playResult: err.name});
+    }
+    try {
+        const popup = window.open('about:blank', '_blank');
+        popup?.close();
+    } catch (_) {}
+    try {
+        // A silent tone: gain 0. Only tests whether audio may start from this tap.
+        let audio = new (window.AudioContext || window.webkitAudioContext)();
+        let oscillator = audio.createOscillator(), gain = audio.createGain();
+        gain.gain.value = 0;
+        oscillator.connect(gain);
+        gain.connect(audio.destination);
+        oscillator.start();
+        audio.resume().then(
+            () => window.__vxrRecordActivation?.(e, {audioState: audio.state}),
+            err => window.__vxrRecordActivation?.(e, {audioState: err.name}));
+        setTimeout(() => {
+            oscillator.stop();
+            audio.close();
+        }, 350);
+    } catch (err) {
+        window.__vxrRecordActivation?.(e, {audioState: err.name});
+    }
+    setTimeout(() => video.muted = true, 350);
+});
+// 60 rows for page scrolling, and 20 inside the nested scroller.
+for (let i = 1; i <= 60; i++) {
+    let row = document.createElement('div');
+    row.className = 'row';
+    row.textContent = 'Row ' + i + ' - Sharp text and smooth scrolling. 0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    document.getElementById('rows').appendChild(row);
+    if (i <= 20) {
+        let inner = row.cloneNode(true);
+        inner.textContent = 'Inner ' + i + ' - Scroll here without moving the page';
+        document.getElementById('inner').appendChild(inner);
+    }
+}
+requestAnimationFrame(tick);
+</script><div style="position:fixed;z-index:100;bottom:0;left:0;right:0;height:32px;background:#142e43;color:white;
+text-align:center;line-height:32px;pointer-events:none">
+Fixed reference bar: the bottom edge should stay flush during scrolling
+</div></body></html>

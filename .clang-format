@@ -1,0 +1,16 @@
+# Objective-C style for Sources/PrivateWebPortal. Matches the Swift settings:
+# 4-space indent, 120 columns, and no one-line statements or blocks.
+BasedOnStyle: LLVM
+Language: ObjC
+IndentWidth: 4
+ColumnLimit: 120
+ObjCBlockIndentWidth: 4
+InsertBraces: true
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+BreakBeforeBraces: Attach
+PointerAlignment: Right
+SortIncludes: Never

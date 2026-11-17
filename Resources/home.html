@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=1000, initial-scale=1, maximum-scale=1">
+<meta http-equiv="Content-Security-Policy"
+    content="default-src 'none'; img-src data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+<title>Home</title>
+<style>
+:root {
+    color-scheme: dark;
+    font: 20px system-ui;
+    color: #e8ecf1;
+    background: #000;
+}
+* {
+    box-sizing: border-box;
+}
+body {
+    margin: 0;
+    padding: 100px 40px 18px;
+}
+header {
+    height: 72px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 3;
+    top: 0;
+    left: 40px;
+    right: 40px;
+    height: 108px;
+    padding-top: 20px;
+    background: #000;
+}
+#search {
+    font: 500 26px system-ui;
+    color: #aab4c2;
+    background: #15181d;
+    border: 2px solid #2b313a;
+    border-radius: 36px;
+    width: 640px;
+    height: 72px;
+    text-align: left;
+    padding-left: 30px;
+}
+#search span {
+    margin-right: 16px;
+}
+time {
+    position: absolute;
+    right: 0;
+    font-size: 29px;
+    font-weight: 600;
+}
+section {
+    margin-top: 17px;
+}
+h2 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: #aab4c2;
+    text-transform: uppercase;
+    margin: 0 0 7px;
+}
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(6,minmax(0,1fr));
+    gap: 14px;
+}
+.tile {
+    font: inherit;
+    width: 100%;
+    height: 104px;
+    border: 2px solid #262b33;
+    border-radius: 18px;
+    background: #14171c;
+    color: inherit;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    transition: transform .12s ease-out, background .12s ease-out;
+}
+.badge {
+    width: 49px;
+    height: 49px;
+    border-radius: 13px;
+    background: #1b1f26;
+    border: 1px solid #303742;
+    display: grid;
+    place-items: center;
+    font-size: 24px;
+    font-weight: 750;
+    color: white;
+}
+.badge img,.badge svg {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    display: block;
+}
+.name {
+    max-width: 100%;
+    padding: 0 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 18px;
+    font-weight: 600;
+}
+.tile.hover,#search.hover {
+    transform: scale(1.045);
+    border-color: #fff;
+    background: #1c2027;
+}
+.tile:active {
+    transform: scale(.97);
+}
+footer {
+    display: flex;
+    justify-content: space-between;
+    color: #aab4c2;
+    margin-top: 18px;
+    font-size: 18px;
+}
+</style>
+<header><button id="search" type="button"><span>⌕</span>Search or enter address</button><time></time></header>
+<main></main>
+<footer><span id="blocking"></span><span id="panel"></span></footer>
+<script>
+const main = document.querySelector('main');
+const panel = document.querySelector('#panel'), blocking = document.querySelector('#blocking');
+const actionArt = {
+    files: '<svg viewBox="0 0 40 40" aria-hidden="true"><path fill="#6CB8FF" d="M3 12a3 3 0 0 1 3-3h10l3 4h15a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3z"/><path fill="#A9D9FF" d="M4 17a3 3 0 0 1 3-3h26a3 3 0 0 1 3 3v2H4z"/><path stroke="#2467AB" stroke-width="2" stroke-linecap="round" d="M10 25h8"/></svg>',
+    photos: '<svg viewBox="0 0 40 40" aria-hidden="true"><rect x="10" y="5" width="27" height="24" rx="5" fill="#B9A5FF"/><rect x="3" y="10" width="29" height="26" rx="5" fill="#8CD5F8"/><circle cx="11" cy="18" r="3" fill="#FFE4A5"/><path fill="#227798" d="m4 29 7-7 5 4 6-8 9 10v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path fill="#5FCFB0" d="m4 29 7-7 7 7 4-4 9 5v1a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/></svg>'
+};
+window.vxrHomeSetup = sites => {
+    main.replaceChildren();
+    if (!sites.length) {
+        main.textContent = 'Add shortcuts from Settings on your iPhone.';
+    }
+    for (const name of new Set(sites.map(site=>site.group))) {
+        const section = document.createElement('section');
+        const title = document.createElement('h2');
+        title.textContent = name;
+        const row = document.createElement('div');
+        row.className = 'tiles';
+        for (const site of sites.filter(x => x.group === name)) {
+            const isAction = Object.hasOwn(actionArt,site.action);
+            const tile = document.createElement(isAction ? 'button' : 'a');
+            tile.className = 'tile';
+            if (isAction) {
+                tile.type = 'button';
+                tile.addEventListener('click', () => {
+                    window.webkit?.messageHandlers?.vxrHomeAction?.postMessage(site.action);
+                });
+            } else {
+                tile.href = site.url;
+            }
+            const badge = document.createElement('span');
+            badge.className = 'badge';
+            badge.setAttribute('aria-hidden','true');
+            const icon = document.createElement('img');
+            icon.alt = '';
+            icon.addEventListener('error',()=> {
+                badge.textContent = site.monogram;
+            },{once:true});
+            if (isAction) {
+                badge.innerHTML = actionArt[site.action];
+            } else if (typeof site.icon === 'string' && /^data:image\/(svg\+xml|png|x-icon);base64,/.test(site.icon)) {
+                icon.src = site.icon;
+                badge.append(icon);
+            } else {
+                badge.textContent = site.monogram;
+            }
+            const label = document.createElement('span');
+            label.className = 'name';
+            label.textContent = site.name;
+            tile.append(badge,label);
+            row.append(tile);
+        }
+        section.append(title,row);
+        main.append(section);
+    }
+};
+let hovered;
+window.vxrHomeHover = (x,y) => {
+    const px = x*innerWidth/1000, py = y*innerHeight/625;
+    const next = document.elementFromPoint(px,py)?.closest('.tile,#search');
+    if (next === hovered) {
+        return;
+    }
+    hovered?.classList.remove('hover');
+    next?.classList.add('hover');
+    hovered = next;
+};
+window.vxrHomeStatus = (n,total,ads) => {
+    panel.textContent = 'Screen '+n+' of '+total;
+    blocking.textContent = ads;
+};
+
+function clock() {
+    document.querySelector('time').textContent = new Date().toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
+clock();
+setInterval(clock,10000);
+</script>
+</html>

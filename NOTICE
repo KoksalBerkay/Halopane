@@ -1,0 +1,25 @@
+Halopane
+Copyright (C) 2026 Koksal Berkay Denktas
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. It is distributed WITHOUT ANY WARRANTY. See LICENSE for the full text.
+
+Third-party material
+
+The bundled content-blocking data is adapted from the EasyList and EasyPrivacy
+lists by the EasyList authors. The adapted data is distributed under CC BY-SA
+3.0 Unported. See ThirdParty/EasyList-EasyPrivacy-NOTICE.md and
+Resources/content-rules-info.json for upstream versions and attribution.
+
+The synthetic gesture code includes material adapted from KIF, distributed
+under Apache License 2.0. See ThirdParty/KIF-NOTICE.txt and
+ThirdParty/Apache-2.0.txt.
+
+Home includes artwork from Simple Icons. Other shortcut artwork is fetched
+from its publisher on the user's device and is not distributed with Halopane.
+See ThirdParty/Home-Icons-NOTICE.md.
+
+VITURE, SpaceWalker and other product names identify compatible hardware,
+software or services. Their owners do not sponsor or endorse this project.

@@ -1,0 +1,21 @@
+{
+  "identifier" : "Halopane-Easy-1-52e76ca745c35c54",
+  "license" : "CC BY-SA 3.0",
+  "licenseURL" : "https://creativecommons.org/licenses/by-sa/3.0/",
+  "pathRules" : 171,
+  "rules" : 45171,
+  "sources" : [
+    {
+      "file" : "easylist.txt",
+      "sha256" : "1db2349fc51e8abb50efd28c644152c2ef581cdceac59dfa87fa77b5ca4059a3",
+      "url" : "https://easylist.to/easylist/easylist.txt",
+      "version" : "202611161333"
+    },
+    {
+      "file" : "easyprivacy.txt",
+      "sha256" : "e242f459a7fb401a340a4cb01fb1cc3991c5252c298def2773fdf41762392042",
+      "url" : "https://easylist.to/easylist/easyprivacy.txt",
+      "version" : "202611161329"
+    }
+  ]
+}
