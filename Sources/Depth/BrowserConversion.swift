@@ -8,8 +8,8 @@ import WebKit
 ///
 /// It first asks the page for a small copy of the current frame. Sites that
 /// serve video from another origin without CORS refuse that, so it then takes
-/// small snapshots of the video's area. Protected video gives neither, and 3D
-/// stops with a reason.
+/// small snapshots of the video's area. Protected video gives only black frames
+/// on both routes, and 3D stops with a reason.
 final class WebDepthCapture {
     enum Route: String {
         case page = "Page frames"
@@ -21,12 +21,17 @@ final class WebDepthCapture {
     /// Black frames in a row, with no picture seen yet, before a route is given up.
     /// About a second and a half at the video depth rate.
     static let blankLimit = 20
+    /// The same for video with media keys, which is usually protected, so the
+    /// viewer hears why within a second.
+    static let encryptedBlankLimit = 6
 
     private(set) var route = Route.page
     private(set) var notes: [String] = []
     var busy = false
     var blankFrames = 0
     var sawPicture = false
+    /// The page reported media keys on this video.
+    var encrypted = false
     var startedAt: CFTimeInterval = 0
     /// What the glasses do with converted video: "shown", or why not.
     private(set) var displayState = ""
@@ -39,6 +44,7 @@ final class WebDepthCapture {
         busy = false
         blankFrames = 0
         sawPicture = false
+        encrypted = false
         displayState = ""
         displayChangedAt = now
         startedAt = now
@@ -169,7 +175,10 @@ extension BrowserScreen {
     var conversionReport: String {
         let estimator = conversion.estimator
         let load = estimator.loadSeconds.map { String(format: ", loaded in %.1f s", $0) } ?? ""
-        let used = owner.allPanels.filter { $0.conversion.stats.estimates > 0 || $0.conversion.isActive }
+        // Include screens where 3D was refused before any depth map.
+        let used = owner.allPanels.filter {
+            $0.conversion.stats.estimates > 0 || $0.conversion.isActive || !$0.depthCapture.notes.isEmpty
+        }
         let screens = used.map { panel in
             let conversion = panel.conversion
             return "Panel \(panel.panelNumber): \(conversion.phase), \(conversion.stats.summary), "
@@ -229,13 +238,17 @@ extension BrowserScreen {
             }
             self.depthCapture.busy = false
             let answer = reply as? [String: Any]
+            if answer?["encrypted"] as? Bool == true, !self.depthCapture.encrypted {
+                self.depthCapture.encrypted = true
+                self.depthCapture.note("page reports media keys")
+            }
             if let text = answer?["image"] as? String, let image = WebDepthCapture.image(fromDataURL: text) {
                 self.useCapturedFrame(image)
                 return
             }
             switch answer?["error"] as? String {
             case "protected":
-                self.conversionUnavailable(Self.protectedVideoNotice, detail: "page reports encrypted media")
+                self.conversionUnavailable(Self.protectedVideoNotice, detail: "encrypted frame could not be drawn")
             case "notReady", "gone":
                 break
             case let reason:
@@ -277,13 +290,15 @@ extension BrowserScreen {
             return
         }
         depthCapture.blankFrames += 1
-        guard !depthCapture.sawPicture, depthCapture.blankFrames >= WebDepthCapture.blankLimit else {
+        let limit = depthCapture.encrypted ? WebDepthCapture.encryptedBlankLimit : WebDepthCapture.blankLimit
+        guard !depthCapture.sawPicture, depthCapture.blankFrames >= limit else {
             return
         }
         if depthCapture.route == .page {
             depthCapture.switchToSnapshots(because: "frames were black")
         } else {
-            conversionUnavailable(Self.protectedVideoNotice, detail: "snapshots were black")
+            let keys = depthCapture.encrypted ? " with media keys" : ""
+            conversionUnavailable(Self.protectedVideoNotice, detail: "snapshots were black" + keys)
         }
     }
 }
