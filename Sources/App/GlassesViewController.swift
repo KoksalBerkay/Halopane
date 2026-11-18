@@ -15,6 +15,7 @@ final class GlassesViewController: UIViewController {
     private var renderer: WorldRenderer?
     private var nativeView: MTKView?
     private var nativeRenderer: NativeMediaRenderer?
+    private let nativeFrame = MediaFrameDrawer()
     private let comparisonSurface = MediaComparisonImageSurface()
     private let liveStereoImages = LiveStereoImageOutput()
     private let mediaHUD = ExternalMediaHUD()
@@ -83,6 +84,7 @@ final class GlassesViewController: UIViewController {
             metal.backgroundColor = .black
             metal.isOpaque = true
             metal.isHidden = true
+            metal.delegate = nativeFrame
             view.addSubview(metal)
             nativeRenderer = renderer
             nativeView = metal
@@ -230,9 +232,16 @@ final class GlassesViewController: UIViewController {
             comparisonSurface.hideImages()
             if media.file != nil, let nativeView, let nativeRenderer {
                 nativeView.isHidden = false
-                nativeRenderer.draw(
-                    in: nativeView, session: media, render: render,
-                    safeArea: BrowserScreen.shared.workspace.visibleArea, hostTime: link.targetTimestamp)
+                // Through the view's own draw, so every frame gets a fresh drawable.
+                // Drawing straight into the view reused one drawable after the first
+                // frame, and a still photo could stay partly black.
+                nativeFrame.draw = { view in
+                    nativeRenderer.draw(
+                        in: view, session: media, render: render,
+                        safeArea: BrowserScreen.shared.workspace.visibleArea, hostTime: link.targetTimestamp)
+                }
+                nativeView.draw()
+                nativeFrame.draw = nil
             } else if nativeView?.isHidden == false {
                 nativeView?.isHidden = true
                 nativeRenderer?.clear()
@@ -335,5 +344,16 @@ private final class PatternView: UIView {
             context.fillEllipse(in: CGRect(x: x - 10, y: region.midY - 10, width: 20, height: 20))
             context.restoreGState()
         }
+    }
+}
+
+/// Lets the Spatial Player's Metal view call back into this frame's drawing.
+private final class MediaFrameDrawer: NSObject, MTKViewDelegate {
+    var draw: ((MTKView) -> Void)?
+
+    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+
+    func draw(in view: MTKView) {
+        draw?(view)
     }
 }
