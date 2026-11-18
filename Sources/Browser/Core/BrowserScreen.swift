@@ -213,6 +213,8 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
     @Published var running = false
     @Published var completed = [String]()
     @Published var portalStatus = "Not attempted"
+    /// How the glasses copy the left eye into the right eye, for the report.
+    var eyeCopyStatus = "Not set"
     let media = BrowserMedia()
     let webPreferences = WKPreferences()
     /// Whether WebKit's encrypted media (FairPlay) APIs were switched on for this screen.

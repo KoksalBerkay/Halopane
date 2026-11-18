@@ -73,6 +73,35 @@ NSString *VXRSetWebFeature(WKPreferences *preferences, NSString *key, BOOL enabl
     }
 }
 
+NSString *VXRWebFeatureSummary(WKPreferences *preferences, NSArray<NSString *> *fragments) {
+    @try {
+        SEL list = NSSelectorFromString(@"_features");
+        SEL get = NSSelectorFromString(@"_isEnabledForFeature:");
+        if (![WKPreferences respondsToSelector:list] || ![preferences respondsToSelector:get]) {
+            return @"feature list unavailable";
+        }
+        NSArray *features = ((id (*)(id, SEL))objc_msgSend)([WKPreferences class], list);
+        NSMutableArray *found = [NSMutableArray array];
+        for (id feature in features) {
+            id name = [feature valueForKey:@"key"];
+            if (![name isKindOfClass:[NSString class]]) {
+                continue;
+            }
+            NSString *lower = [name lowercaseString];
+            for (NSString *fragment in fragments) {
+                if ([lower containsString:fragment]) {
+                    BOOL on = ((BOOL (*)(id, SEL, id))objc_msgSend)(preferences, get, feature);
+                    [found addObject:[NSString stringWithFormat:@"%@ %@", name, on ? @"on" : @"off"]];
+                    break;
+                }
+            }
+        }
+        return found.count ? [found componentsJoinedByString:@", "] : @"none matched";
+    } @catch (NSException *exception) {
+        return [NSString stringWithFormat:@"feature list exception: %@", exception.reason];
+    }
+}
+
 // Turns on WebKit's modern and legacy EME, which FairPlay sites use.
 NSString *VXREnableEncryptedMedia(WKPreferences *preferences) {
     NSString *modern = VXRSetWebFeature(preferences, @"EncryptedMediaAPIEnabled", YES);

@@ -13,6 +13,18 @@ extension BrowserScreen {
         portalStatus = value
     }
 
+    func setEyeCopyStatus(_ value: String) {
+        eyeCopyStatus = value
+    }
+
+    /// WebKit switches that decide how page layers are drawn. They differ between
+    /// iOS versions, so the report lists what this iPhone has.
+    private var webRenderingFeatures: String {
+        VXRWebFeatureSummary(
+            web.configuration.preferences,
+            ["displaylist", "scaling", "gpuprocessfordom", "remotelayer", "accelerateddrawing", "asyncdecoding"])
+    }
+
     func resetCounters() {
         frameStats.lastTick = nil
         frameStats.displayTicks = 0
@@ -170,6 +182,8 @@ extension BrowserScreen {
             MediaSource: \(mediaSourceStatus)
             2D to 3D: \(conversionReport)
             Portal: \(portalStatus)
+            Eye copy: \(eyeCopyStatus)
+            WebKit rendering: \(webRenderingFeatures)
             \(metrics)
             Page telemetry: \(frameStats.sourceMetrics)
             Recent timed fixture samples:\n\(diagnostics.fixtureHistory.joined(separator:"\n"))
