@@ -28,6 +28,9 @@ extension BrowserScreen {
                 media.setCinema(true)
             }
         }
+        if packing != nil {
+            conversion.stop()
+        }
         stereoPacking = packing
         if packing == nil {
             stereoSwapEyes = false
@@ -43,6 +46,7 @@ extension BrowserScreen {
     }
 
     func exitVideoView() {
+        conversion.stop()
         setStereoVideo(nil)
         media.exitVideoPresentation()
         if self === owner.selectedSession, workspace.fullScreen {

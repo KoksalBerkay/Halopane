@@ -168,6 +168,7 @@ extension BrowserScreen {
             \(diagnostics.videoEvidence)
             Encrypted media: \(encryptedMediaStatus)
             MediaSource: \(mediaSourceStatus)
+            2D to 3D: \(conversionReport)
             Portal: \(portalStatus)
             \(metrics)
             Page telemetry: \(frameStats.sourceMetrics)

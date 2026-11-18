@@ -24,6 +24,8 @@ extension GlassesSurface {
         /// Opacity of the panels that are not selected while full screen fades in.
         let otherOpacity: CGFloat
         let stereoLayout: StereoCinemaLayout?
+        /// True while the active screen's video is shown converted to 3D.
+        let converting: Bool
     }
 
     func updateWorkspace(_ link: CADisplayLink, frame: RenderFrame) {
@@ -50,11 +52,14 @@ extension GlassesSurface {
         } else {
             stereoVideo.releaseVideo()
         }
+        let converting = showConvertedVideo(
+            active: active, wide: wide, fullyExpanded: fullyExpanded, eye: eye, visible: visible, now: now)
         let context = WorkspaceFrame(
             link: link, frame: frame, now: now, active: active, panelCount: sessions.count, eye: eye,
             viewport: SIMD2(Float(eye.width), Float(eye.height)), visible: visible,
             pixels: window?.windowScene?.screen.currentMode?.size, blend: blend, fullRouting: fullRouting,
-            fullyExpanded: fullyExpanded, otherOpacity: browser.fullFade(at: now), stereoLayout: stereoLayout)
+            fullyExpanded: fullyExpanded, otherOpacity: browser.fullFade(at: now), stereoLayout: stereoLayout,
+            converting: converting)
         var transforms: [Int: simd_float4x4] = [:]
         for panel in sessions {
             transforms[panel.panelNumber] = layOutPanel(panel, in: context)
@@ -102,7 +107,7 @@ extension GlassesSurface {
         let active = context.active
         let frame = context.frame
         let viewport = context.viewport
-        let showingStereo = panel === active && context.stereoLayout != nil
+        let showingStereo = panel === active && (context.stereoLayout != nil || context.converting)
         panel.setDrawingStereoVideo(showingStereo)
         let slotCamera = panel.offset.camera(frame.orientation)
         let crossfade = browser.fullCrossfade(panel: panel.panelNumber, at: context.now)
@@ -279,7 +284,8 @@ extension GlassesSurface {
     // The message at the bottom of the view. The first message that applies wins.
     private func updateWorkspaceNotice(active: BrowserScreen, wide: Bool, in context: WorkspaceFrame) {
         let waitingFor3D =
-            !wide && context.fullyExpanded && active.stereoPacking != nil && active.media.cinema
+            !wide && context.fullyExpanded && (active.stereoPacking != nil || active.conversion.isActive)
+            && active.media.cinema
         let message: String
         if let pickerStatus = active.localPickerStatus {
             message = pickerStatus

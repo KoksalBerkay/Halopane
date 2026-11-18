@@ -89,6 +89,9 @@ final class BrowserScreen: NSObject, ObservableObject, WKNavigationDelegate, WKU
     var pendingLocalNavigation: WKNavigation?
     var localPhotoZoom: CGFloat = 1
     @Published var stereoPacking: StereoPacking?
+    /// 2D-to-3D for this screen's video, and how its frames are read.
+    let conversion = StereoConversion()
+    let depthCapture = WebDepthCapture()
     @Published var stereoSwapEyes = false
     var drawingStereoVideo = false
 

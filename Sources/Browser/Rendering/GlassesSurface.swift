@@ -26,6 +26,7 @@ final class GlassesSurface: UIView {
     private var workspaceRendering = false
     var mounts: [Int: PanelMount] = [:]
     let stereoVideo = StereoVideoMount()
+    let convertedVideo = ConvertedVideoMount()
     let edgeHint = UILabel()
     let workspaceNotice = UILabel()
     let calibration = CAShapeLayer()
@@ -58,6 +59,7 @@ final class GlassesSurface: UIView {
         dots = []
         browser.uploadSnapshot = nil
         stereoVideo.releaseVideo()
+        convertedVideo.releaseVideo()
         mounts.values.forEach {
             $0.detach()
         }

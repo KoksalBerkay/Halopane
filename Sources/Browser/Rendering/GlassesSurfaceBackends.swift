@@ -124,12 +124,15 @@ extension GlassesSurface {
         }
     }
 
-    // 3D video layer, edge hint, notice, calibration frame and pointers for the workspace.
+    // 3D video layers, edge hint, notice, calibration frame and pointers for the workspace.
     func configureWorkspaceOverlays(wide: Bool, eyeWidth: CGFloat) {
         stereoVideo.frame = bounds
         stereoVideo.isHidden = true
+        convertedVideo.frame = bounds
+        convertedVideo.isHidden = true
         if let replica {
             insertSubview(stereoVideo, belowSubview: replica)
+            insertSubview(convertedVideo, belowSubview: replica)
         }
         edgeHint.font = .systemFont(ofSize: 28, weight: .semibold)
         edgeHint.textAlignment = .center

@@ -45,7 +45,7 @@ struct PanelChip: View {
     }
 }
 
-/// Play, seek, mute, video view and 3D format for the selected video.
+/// Play, seek, mute, video view and 3D for the selected video.
 struct PlaybackControls: View {
     @ObservedObject var browser: BrowserScreen
     @ObservedObject var media: BrowserMedia
@@ -60,6 +60,8 @@ struct PlaybackControls: View {
                 if let range = video.range, !media.seekFailed {
                     timeline(video, range: range)
                 }
+                DepthControlsRow(conversion: browser.conversion)
+                ConversionHint(conversion: browser.conversion, display: .shared)
             }
             if media.nativeFullscreen && media.video == nil {
                 Button("Exit video view") {
@@ -103,7 +105,7 @@ struct PlaybackControls: View {
             .accessibilityLabel(video.muted ? "Unmute" : "Mute")
             videoViewButton
             if !media.nativeFullscreen {
-                stereoMenu
+                threeDButton
             }
         }.buttonStyle(ControllerButtonStyle())
     }
@@ -119,30 +121,46 @@ struct PlaybackControls: View {
         }.font(.footnote.weight(.semibold))
     }
 
-    // Chooses how a 3D video packs its two eyes, or turns 3D off.
-    private var stereoMenu: some View {
-        Menu {
-            Button("Off") {
+    // Tap converts 2D video to 3D. Hold for video that already holds two eye views.
+    private var threeDButton: some View {
+        Convert3DButton(conversion: browser.conversion, packedOn: browser.stereoPacking != nil, compact: true) {
+            if browser.stereoPacking != nil {
                 browser.setStereoVideo(nil)
+            } else {
+                withAnimation(.easeOut(duration: 0.2)) {
+                    browser.toggleConversion()
+                }
             }
+        }
+        .contextMenu {
+            threeDOptions
+        }
+        .accessibilityHint("Hold for videos that are already 3D")
+    }
+
+    @ViewBuilder private var threeDOptions: some View {
+        Section("Video is already 3D") {
             ForEach(StereoPacking.allCases) { packing in
                 Button(packing.rawValue) {
                     browser.setStereoVideo(packing)
                 }
             }
-            if browser.stereoPacking != nil {
-                Button(browser.stereoSwapEyes ? "Restore eye order" : "Swap eyes") {
-                    browser.swapStereoVideoEyes()
-                }
-            } else if let last = browser.preferredStereoPacking {
-                Button("Last used: " + last.rawValue) {
-                    browser.setStereoVideo(last)
-                }
+        }
+        if browser.stereoPacking != nil {
+            Button(browser.stereoSwapEyes ? "Restore eye order" : "Swap eyes") {
+                browser.swapStereoVideoEyes()
             }
-        } label: {
-            Text("3D").font(.footnote.weight(.semibold))
-        }.accessibilityLabel("3D video format")
-            .accessibilityValue(browser.stereoPacking?.rawValue ?? "Off")
+        } else if let last = browser.preferredStereoPacking {
+            Button("Last used: " + last.rawValue) {
+                browser.setStereoVideo(last)
+            }
+        }
+        if browser.stereoPacking != nil || browser.conversion.isActive {
+            Button("Turn 3D off", role: .destructive) {
+                browser.conversion.stop()
+                browser.setStereoVideo(nil)
+            }
+        }
     }
 
     // While dragging, only the label follows the slider. The page seeks on release.

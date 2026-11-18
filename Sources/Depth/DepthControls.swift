@@ -5,7 +5,13 @@ import SwiftUI
 /// the model prepares, so a slow first start never looks like a missed tap.
 struct Convert3DButton: View {
     @ObservedObject var conversion: StereoConversion
+    /// Lights the button for 3D that needs no conversion, such as a side-by-side video.
+    var packedOn = false
+    /// Sized like the playback bar's other buttons.
+    var compact = false
     let action: () -> Void
+
+    private var lit: Bool { conversion.isActive || packedOn }
 
     var body: some View {
         Button(action: action) {
@@ -18,13 +24,13 @@ struct Convert3DButton: View {
                 Text("3D")
             }
             .font(.footnote.weight(.semibold))
-            .padding(.horizontal, 10)
-            .frame(minWidth: 56, minHeight: 44)
+            .padding(.horizontal, compact ? 4 : 10)
+            .frame(minWidth: compact ? 0 : 56, minHeight: compact ? 0 : 44)
         }
-        .buttonStyle(ControllerButtonStyle(selected: conversion.isActive))
+        .buttonStyle(ControllerButtonStyle(selected: lit))
         .accessibilityLabel("Convert to 3D")
-        .accessibilityValue(conversion.isActive ? "On" : "Off")
-        .accessibilityAddTraits(conversion.isActive ? .isSelected : [])
+        .accessibilityValue(lit ? "On" : "Off")
+        .accessibilityAddTraits(lit ? .isSelected : [])
     }
 }
 
@@ -67,5 +73,33 @@ struct DepthControlsRow: View {
             set: {
                 conversion.settings.strength = Float($0)
             })
+    }
+}
+
+/// One line on the phone that says what 3D is waiting for, if anything.
+struct ConversionHint: View {
+    @ObservedObject var conversion: StereoConversion
+    @ObservedObject var display: GlassesDisplay
+
+    var body: some View {
+        if let text {
+            Text(text).font(.caption).foregroundStyle(ControllerPalette.secondary).lineLimit(2)
+        }
+    }
+
+    private var text: String? {
+        guard conversion.isActive else {
+            return nil
+        }
+        if let failure = conversion.failure {
+            return failure
+        }
+        if !display.externalStereo {
+            return "Switch the glasses to 3D mode to see depth."
+        }
+        if conversion.phase == .preparing {
+            return "Preparing 3D…"
+        }
+        return nil
     }
 }

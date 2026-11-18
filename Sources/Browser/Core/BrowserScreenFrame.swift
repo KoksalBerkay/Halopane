@@ -32,6 +32,7 @@ extension BrowserScreen {
             requestSnapshot(now: now)
         }
         updateHomeHover(now: now)
+        updateDepthCapture(now: now)
         flushNativeScroll()
         if scroll.catalogScroll {
             flushScroll()

@@ -207,6 +207,30 @@ final class BrowserMedia: NSObject, ObservableObject, WKScriptMessageHandler {
         return CinemaMapping(crop: crop)
     }
 
+    /// Shows why 3D conversion stopped, under the playback controls.
+    func setConversionStatus(_ text: String) {
+        status = text
+    }
+
+    /// Runs a page-script function on the selected video, in the frame and script
+    /// world that reported it. `body` sees the video's id as `id`.
+    func evaluateOnVideo(_ body: String, arguments: [String: Any], completion: @escaping (Any?) -> Void) {
+        guard let current, let web else {
+            completion(nil)
+            return
+        }
+        let request = generation
+        var values = arguments
+        values["id"] = current.video.id
+        web.callAsyncJavaScript(body, arguments: values, in: current.frame, in: world) { [weak self] result in
+            guard let self, self.generation == request, case .success(let value) = result else {
+                completion(nil)
+                return
+            }
+            completion(value)
+        }
+    }
+
     func setCinema(_ enabled: Bool) {
         if enabled {
             requestCinema(nil)

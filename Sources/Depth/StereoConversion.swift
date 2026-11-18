@@ -74,6 +74,10 @@ final class StereoConversion: ObservableObject {
     }
 
     var isActive: Bool { phase != .off }
+    /// True while depth is on or still fading out.
+    var isShowing: Bool { isActive || !animator.finished }
+    /// True once a depth map has arrived since the last start.
+    var hasDepthMap: Bool { hasDepth }
     var failure: String? {
         if case .failed(let message) = estimator.state {
             return message

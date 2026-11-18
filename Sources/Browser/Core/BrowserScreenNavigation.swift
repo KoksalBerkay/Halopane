@@ -184,6 +184,7 @@ extension BrowserScreen {
             cloudController.stop(web: web)
             stereoPacking = nil
             stereoSwapEyes = false
+            conversion.stop()
             drawingStereoVideo = false
             cloudPage.id = UUID()
             cloudPage.service = nil

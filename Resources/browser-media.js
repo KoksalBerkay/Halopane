@@ -146,6 +146,31 @@
         report();
         return true;
     };
+    // A small copy of the current frame for 2D-to-3D depth. Protected video and
+    // cross-origin video without CORS cannot be read; the app falls back or explains.
+    let frameCanvas;
+    globalThis.vxrMediaFrame = (id,width) => {
+        const video = selected;
+        if (!video?.isConnected || ids.get(video) !== id) {
+            return {error: 'gone'};
+        }
+        if (video.mediaKeys || video.webkitKeys) {
+            return {error: 'protected'};
+        }
+        if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+            return {error: 'notReady'};
+        }
+        const height = Math.max(1, Math.round(width * video.videoHeight / video.videoWidth));
+        frameCanvas = frameCanvas || document.createElement('canvas');
+        frameCanvas.width = width;
+        frameCanvas.height = height;
+        try {
+            frameCanvas.getContext('2d').drawImage(video,0,0,width,height);
+            return {image: frameCanvas.toDataURL('image/jpeg',0.85)};
+        } catch (error) {
+            return {error: error?.name === 'SecurityError' ? 'crossOrigin' : 'failed'};
+        }
+    };
     document.addEventListener('vxr-cinema-request',()=>{
         report();
         if (selected) {
