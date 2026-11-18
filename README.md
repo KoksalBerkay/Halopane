@@ -37,7 +37,7 @@ Halopane works without a vendor SDK.
 - **Live web pages, not a mirrored screen.** Each screen hosts a live WebKit page. As you move your head, the display updates its perspective. In side-by-side mode, ordinary browser content is duplicated for the other eye.
 - **A pointer that reaches into the glasses.** The pages you see are not on a touchscreen, so Halopane maps phone input to the page in the glasses. Support for page controls and text entry depends on the site.
 - **True stereo playback.** Apple spatial video is decoded as two separate eye views and sent to the matching eye. 180° and 360° video is reprojected live as you look around.
-- **2D-to-3D on the phone.** A depth model on the iPhone's Neural Engine estimates depth about 15 times a second, and each eye's picture is shifted by it. Web video stays live while this happens.
+- **2D-to-3D on the phone.** A depth model, Depth Anything V2 Small, runs on the iPhone's Neural Engine and estimates depth about 15 times a second, and each eye's picture is shifted by it. Web video stays live while this happens.
 - **Everything on the phone.** Tracking, rendering, browsing and decoding all run on the iPhone. You need a Mac to build from source.
 - **A filter-list converter on the device.** Standard ad-block lists are converted on the phone into the format iOS understands, so you can bring your own.
 
@@ -112,7 +112,7 @@ Halopane contacts a list's address only when you add it or press Update. Some ad
 
 ## 🔒 Privacy
 
-Halopane has no accounts, no analytics and no server of its own. WebKit loads the pages you open and the resources those pages request. Halopane also fetches and occasionally refreshes Home icons from websites and their icon hosts, including in the background. It downloads a filter list only when you add it or tap Update. The rendering and input lab in Advanced settings can load a bundled test page without a network connection. If you enter a web address there or choose the Xbox test address, WebKit loads it like any other page. The report you can share from Settings names only well-known services, and leaves out other sites, page titles, files and typed text.
+Halopane has no accounts, no analytics and no server of its own. WebKit loads the pages you open and the resources those pages request. Halopane also fetches and occasionally refreshes Home icons from websites and their icon hosts, including in the background. It downloads a filter list only when you add it or tap Update. For 2D-to-3D, small copies of video frames and photos are read on the phone to estimate depth; they are not saved or sent anywhere. The rendering and input lab in Advanced settings can load a bundled test page without a network connection. If you enter a web address there or choose the Xbox test address, WebKit loads it like any other page. The report you can share from Settings names only well-known services, and leaves out other sites, page titles, files and typed text.
 
 ## 🛠️ Build from source
 
@@ -162,6 +162,6 @@ Copyright © 2026 Koksal Berkay Denktas.
 
 Halopane's code is licensed under [GPL-3.0-or-later](LICENSE). You are free to use, study, change and share it. If you distribute it or something built from it, you must share your source under the same licence.
 
-The bundled filter rules are derived from EasyList and EasyPrivacy and remain under CC BY-SA 3.0. Other third-party credits are in [NOTICE](NOTICE).
+The bundled filter rules are derived from EasyList and EasyPrivacy and remain under CC BY-SA 3.0. The bundled depth model is Depth Anything V2 Small by Lihe Yang et al., in Apple's Core ML conversion, under the Apache License 2.0; see [its notice](ThirdParty/Depth-Anything-V2-NOTICE.md). Other third-party credits are in [NOTICE](NOTICE).
 
 VITURE, Luma Ultra and all other product names and logos belong to their owners and are used here only to describe compatibility.
