@@ -43,6 +43,12 @@ mkdir -p "$build_dir/Payload"
 ditto "$build_dir/Build/Build/Products/Release-iphoneos/$target.app" \
     "$build_dir/Payload/$target.app"
 app="$build_dir/Payload/$target.app"
+# Debug symbols name folders on the build machine. The app does not need them.
+xcrun strip -S "$app/$target"
+if LC_ALL=C grep -q -a "$HOME" "$app/$target"; then
+    echo "The app binary still names the build machine's home folder." >&2
+    exit 1
+fi
 # Keep optional rules outside the Xcode build and package them only on request.
 local_name=halopane-local-site-rules.json
 included=no
