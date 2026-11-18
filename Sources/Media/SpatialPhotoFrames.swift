@@ -73,8 +73,12 @@ enum NativePhotoFrames {
     static func read(_ source: CGImageSource, maxSide: Int) -> (CGImage, CGImage?)? {
         let count = CGImageSourceGetCount(source)
         let eyes = eyeIndices(source)
+        // Decode the pixels now, on this background task. RAW photos otherwise
+        // decode lazily when first drawn, and the first 3D upload of one came out
+        // mostly black.
         let options =
             [
+                kCGImageSourceShouldCacheImmediately: true,
                 kCGImageSourceCreateThumbnailWithTransform: true,
                 kCGImageSourceCreateThumbnailFromImageAlways: true,
                 kCGImageSourceThumbnailMaxPixelSize: (eyes == nil ? maxSide : min(maxSide, 3072))
