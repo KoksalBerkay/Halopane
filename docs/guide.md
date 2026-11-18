@@ -42,7 +42,7 @@ When the app detects a video, the playback controls appear on the phone. Use the
 
 Tap **3D** in the playback controls. Halopane opens the video in Video view and Full Screen, then adds depth that it estimates on the iPhone from each frame. Switch the glasses to 3D with their physical control when prompted; depth appears as soon as they are in 3D mode. The first time takes a few seconds while the depth model prepares.
 
-While 3D is on, the phone shows a **Depth** slider and a **Pop-out** switch. Depth sets how strong the effect is. With Pop-out off, the picture sits behind the screen; with it on, near objects come towards you. Changes show in the glasses straight away and are remembered. Tap **3D** again to go back to 2D.
+While 3D is on, the phone shows a **Depth** slider and a **Pop-out** switch. Depth sets how strong the effect is. With Pop-out off, the picture sits behind the screen; with it on, near objects come towards you. Changes show in the glasses straight away and are remembered. Tap **3D** again to go back to 2D. While a video is shown in 3D, the pointer is hidden and a tap on the phone plays or pauses, like a TV; use the playback controls to seek or leave Video view.
 
 Video protected with FairPlay, such as on Netflix or Disney+, can't be converted: the system doesn't let apps read its picture. Halopane says so and keeps the video in 2D.
 
