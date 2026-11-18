@@ -202,6 +202,14 @@ extension BrowserShell {
                 .font(.footnote).foregroundStyle(ControllerPalette.secondary)
                 .lineLimit(1)
             Spacer()
+            // Photos have no playback controls, so their 3D button lives here.
+            if browser.localFile?.kind == .image {
+                Button(action: browser.viewPhotoIn3D) {
+                    Label("3D", systemImage: "cube.transparent").font(.footnote.weight(.semibold))
+                        .padding(.horizontal, 10).frame(height: 44)
+                }.buttonStyle(ControllerButtonStyle())
+                    .accessibilityLabel("View photo in 3D")
+            }
             Button {
                 browser.addressEditing = true
             } label: {

@@ -62,7 +62,7 @@ Choose **Open Photos** or **Open Files** from Home or **More** on the phone, the
 
 Set **View** to **Flat**, **180°** or **360°** to match the media. **Layout** describes how the eyes are stored: **Mono**, one of the side-by-side or over-under choices, or **Spatial stereo** when the file contains separate eye views. Switch the glasses to 3D using their physical control when prompted.
 
-For an ordinary 2D photo or video, tap **3D** next to Layout to add depth, the same way as for web video. 3D stays on as you open the next item until you turn it off.
+For an ordinary 2D photo or video, tap **3D** next to Layout to add depth, the same way as for web video. 3D stays on as you open the next item until you turn it off. A photo open in a screen has its own **3D** button next to **Keyboard** on the phone; it opens the photo here with depth already on.
 
 Tap the phone surface to play or pause. Drag to scrub a flat video or to look around in a panorama. Use **Recenter** to reset the view or **World-fixed** to pin a flat view in place when that option is available. Use **Open in screen** to switch to the browser viewer or **Close player** to return to your workspace.
 

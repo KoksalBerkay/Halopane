@@ -189,6 +189,19 @@ extension BrowserScreen {
         return (["model \(estimator.state)\(load)"] + screens + [playerLine]).joined(separator: " | ")
     }
 
+    /// Opens this screen's photo in the Spatial Player with depth on. Photos have
+    /// no video for the browser's own conversion, and the player draws them sharper.
+    func viewPhotoIn3D() {
+        guard let file = localFile, file.kind == .image else {
+            return
+        }
+        owner.openNativeMedia(file, from: self)
+        let player = GlassesDisplay.shared.nativeMedia
+        if player.file === file {
+            player.conversion.start()
+        }
+    }
+
     /// Stops conversion and tells the viewer why.
     func conversionUnavailable(_ message: String, detail: String) {
         depthCapture.note(detail)
