@@ -14,6 +14,7 @@ else
 fi
 swiftc "${module[@]}" \
   Sources/Depth/{DepthEstimator,StereoConversion,StereoWarpRenderer}.swift \
+  Sources/Media/ImageTexture.swift \
   Verification/Depth3DSmoke.swift -o "$harness_dir/depth-3d-smoke"
 mkdir -p artifacts
 "$harness_dir/depth-3d-smoke" Resources/DepthAnythingV2SmallF16P6.mlpackage artifacts/depth-3d-mac-smoke.png "$@"

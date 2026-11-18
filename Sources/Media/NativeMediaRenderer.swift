@@ -28,7 +28,6 @@ final class NativeMediaRenderer {
     private let queue: MTLCommandQueue
     private let pipeline: MTLRenderPipelineState
     private let cache: CVMetalTextureCache
-    private let loader: MTKTextureLoader
     private let inFlight = DispatchSemaphore(value: 2)
     /// Draws 2D media as two eyes when 3D conversion is on.
     private let warp: StereoWarpRenderer?
@@ -47,7 +46,6 @@ final class NativeMediaRenderer {
         }
         self.cache = cache
         self.queue = queue
-        loader = MTKTextureLoader(device: device)
         let library = try device.makeLibrary(source: Self.shader, options: nil)
         let descriptor = MTLRenderPipelineDescriptor()
         descriptor.vertexFunction = library.makeFunction(name: "mediaVertex")
@@ -74,10 +72,9 @@ final class NativeMediaRenderer {
         }
         if !triedPhoto, let photo = session.photo {
             triedPhoto = true
-            let options: [MTKTextureLoader.Option: Any] = [.SRGB: false, .origin: MTKTextureLoader.Origin.topLeft]
-            if let left = try? loader.newTexture(cgImage: photo.0, options: options) {
+            if let left = ImageTexture.make(photo.0, device: device) {
                 let right = photo.1.flatMap {
-                    try? loader.newTexture(cgImage: $0, options: options)
+                    ImageTexture.make($0, device: device)
                 }
                 content = Frame(left: left, right: right, retained: [], decodedBuffers: [])
             }
@@ -121,12 +118,7 @@ final class NativeMediaRenderer {
             guard let image = MediaLuma.convertedImage(buffer) else {
                 return nil
             }
-            return try? loader.newTexture(
-                cgImage: image,
-                options: [
-                    .SRGB: false, .origin: MTKTextureLoader.Origin.topLeft,
-                    .textureStorageMode: NSNumber(value: MTLStorageMode.shared.rawValue)
-                ])
+            return ImageTexture.make(image, device: device)
         }
 
         let width = CVPixelBufferGetWidth(buffer), height = CVPixelBufferGetHeight(buffer)

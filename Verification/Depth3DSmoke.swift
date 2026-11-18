@@ -57,6 +57,7 @@ import UniformTypeIdentifiers
             try checkDepthOrder(mesh)
         }
 
+        try checkImageColors(device: device)
         let warp = try StereoWarpRenderer(device: device)
         let source = try texture(image, device: device)
         let eyes = try render(warp: warp, queue: queue, source: source, mesh: mesh, quarterTurns: 0)
@@ -164,10 +165,41 @@ import UniformTypeIdentifiers
 
     // MARK: Images
 
-    // Kept out of the async main, which would pick the loader's async overload.
     static func texture(_ image: CGImage, device: MTLDevice) throws -> MTLTexture {
-        try MTKTextureLoader(device: device).newTexture(
-            cgImage: image, options: [.SRGB: false, .origin: MTKTextureLoader.Origin.topLeft.rawValue])
+        guard let texture = ImageTexture.make(image, device: device) else {
+            throw Check.failed("Image upload failed")
+        }
+        return texture
+    }
+
+    /// A decoded JPEG has no alpha and its first byte unused; HDR photos have
+    /// 10 or 16 bits per channel. Red must stay red in both.
+    static func checkImageColors(device: MTLDevice) throws {
+        let layouts: [(name: String, bits: Int, info: UInt32)] = [
+            ("JPEG layout", 8, CGImageAlphaInfo.noneSkipFirst.rawValue),
+            ("16-bit", 16, CGImageAlphaInfo.premultipliedLast.rawValue | CGBitmapInfo.byteOrder16Little.rawValue)
+        ]
+        for layout in layouts {
+            guard let space = CGColorSpace(name: CGColorSpace.sRGB),
+                let context = CGContext(
+                    data: nil, width: 8, height: 8, bitsPerComponent: layout.bits, bytesPerRow: 0, space: space,
+                    bitmapInfo: layout.info)
+            else {
+                throw Check.failed("Could not draw the \(layout.name) test picture")
+            }
+            context.setFillColor(CGColor(red: 1, green: 0.1, blue: 0.1, alpha: 1))
+            context.fill(CGRect(x: 0, y: 0, width: 8, height: 8))
+            guard let image = context.makeImage(), let texture = ImageTexture.make(image, device: device) else {
+                throw Check.failed("Could not upload the \(layout.name) test picture")
+            }
+            var pixel = [UInt8](repeating: 0, count: 4)
+            texture.getBytes(&pixel, bytesPerRow: 8 * 4, from: MTLRegionMake2D(0, 0, 1, 1), mipmapLevel: 0)
+            // BGRA order: red is the third byte.
+            guard pixel[2] > 200, pixel[0] < 60 else {
+                throw Check.failed("\(layout.name) photo colors changed: BGRA \(pixel)")
+            }
+        }
+        print("Photo colors kept for JPEG and 16-bit layouts")
     }
 
     static func loadImage(_ path: String) throws -> CGImage {
