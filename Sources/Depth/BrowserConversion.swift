@@ -28,8 +28,9 @@ final class WebDepthCapture {
     var blankFrames = 0
     var sawPicture = false
     var startedAt: CFTimeInterval = 0
-    /// Set once the glasses have shown this video through the depth mesh.
-    var meshShown = false
+    /// What the glasses do with converted video: "shown", or why not.
+    private(set) var displayState = ""
+    private var displayChangedAt: CFTimeInterval = 0
     var lastCapture: CFTimeInterval = 0
     var request = UUID()
 
@@ -38,7 +39,8 @@ final class WebDepthCapture {
         busy = false
         blankFrames = 0
         sawPicture = false
-        meshShown = false
+        displayState = ""
+        displayChangedAt = now
         startedAt = now
         lastCapture = 0
         request = UUID()
@@ -51,9 +53,24 @@ final class WebDepthCapture {
         sawPicture = false
     }
 
+    /// Notes each change, with the seconds since 3D was turned on.
+    func setDisplayState(_ state: String) {
+        guard state != displayState else {
+            return
+        }
+        displayState = state
+        displayChangedAt = CACurrentMediaTime()
+        note(String(format: "%.1f s: glasses %@", displayChangedAt - startedAt, state))
+    }
+
+    /// Seconds the current display state has lasted.
+    func displayStateAge(now: CFTimeInterval) -> CFTimeInterval {
+        now - displayChangedAt
+    }
+
     func note(_ text: String) {
         notes.append(text)
-        if notes.count > 12 {
+        if notes.count > 24 {
             notes.removeFirst()
         }
     }
@@ -125,6 +142,27 @@ extension BrowserScreen {
         if !GlassesDisplay.shared.externalStereo {
             showNotice("Switch the glasses to 3D mode.")
         }
+    }
+
+    /// The glasses' message for 3D, if any: preparing, or why it is held back.
+    func conversionNotice(now: CFTimeInterval) -> String? {
+        guard conversion.isActive else {
+            return nil
+        }
+        if let failure = conversion.failure {
+            return failure
+        }
+        let state = depthCapture.displayState
+        // Short waits, such as Full Screen opening, pass without a message.
+        if state != "shown", !state.isEmpty, state != "glasses in 2D mode",
+            depthCapture.displayStateAge(now: now) > 1.5
+        {
+            return "3D is waiting: " + state + "."
+        }
+        if conversion.phase == .preparing {
+            return "Preparing 3D…"
+        }
+        return nil
     }
 
     /// Model state and each screen's conversion, for the diagnostics report.

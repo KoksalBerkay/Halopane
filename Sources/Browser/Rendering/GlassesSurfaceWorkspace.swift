@@ -291,6 +291,8 @@ extension GlassesSurface {
             message = pickerStatus
         } else if waitingFor3D {
             message = "Switch the glasses to 3D mode."
+        } else if let conversion = active.conversionNotice(now: context.now) {
+            message = conversion
         } else if !browser.trackingNotice.isEmpty {
             message = browser.trackingNotice
         } else if !active.browserNotice.isEmpty {
