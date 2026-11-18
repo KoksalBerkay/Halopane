@@ -209,3 +209,53 @@ final class StereoDepthAnimatorTests: XCTestCase {
         XCTAssertEqual(jumped[4, 1], 0, accuracy: 0.0001)
     }
 }
+
+final class ConvertedVideoLayoutTests: XCTestCase {
+    private let eye = CGSize(width: 1920, height: 1080)
+
+    func testVideoFillsTheVisibleAreaAndKeepsItsShape() throws {
+        let crop = CGRect(x: 100, y: 50, width: 640, height: 360)
+        let layout = try XCTUnwrap(
+            ConvertedVideoLayout(crop: crop, eyeSize: eye, visible: CGRect(origin: .zero, size: eye)))
+        XCTAssertEqual(layout.fitted, CGRect(x: 0, y: 0, width: 1920, height: 1080))
+        XCTAssertEqual(layout.scale, 3, accuracy: 0.0001)
+        // The crop's top left lands on the fitted rectangle's top left.
+        XCTAssertEqual(layout.pageCenter.x - 500 * layout.scale, -crop.minX * layout.scale, accuracy: 0.001)
+        XCTAssertEqual(layout.pageCenter.y - 312.5 * layout.scale, -crop.minY * layout.scale, accuracy: 0.001)
+        XCTAssertEqual(layout.rightEyeOffset, 1, accuracy: 0.0001)
+    }
+
+    func testWideVideoIsLetterboxedInsideACroppedView() throws {
+        let visible = CGRect(x: 100, y: 200, width: 1600, height: 800)
+        let layout = try XCTUnwrap(
+            ConvertedVideoLayout(
+                crop: CGRect(x: 0, y: 0, width: 1000, height: 250), eyeSize: eye, visible: visible))
+        XCTAssertEqual(layout.fitted.width, 1600, accuracy: 0.001)
+        XCTAssertEqual(layout.fitted.height, 400, accuracy: 0.001)
+        XCTAssertEqual(layout.fitted.midY, visible.midY, accuracy: 0.001)
+        XCTAssertEqual(layout.rightEyeOffset, 1.2, accuracy: 0.0001)
+    }
+
+    func testRejectsEmptyInput() {
+        XCTAssertNil(ConvertedVideoLayout(crop: .zero, eyeSize: eye, visible: CGRect(origin: .zero, size: eye)))
+        let square = CGRect(x: 0, y: 0, width: 10, height: 10)
+        XCTAssertNil(ConvertedVideoLayout(crop: square, eyeSize: eye, visible: .zero))
+    }
+
+    func testLayerMeshDrawsBothEyesFromTheSameSource() {
+        let mesh = StereoDepthMesh(
+            depth: DepthGrid(columns: 5, rows: 3, filling: 0), settings: StereoDepthSettings(strength: 1))
+        let points = mesh.layerPoints(rightEyeOffset: 1.25)
+        let perEye = mesh.columns * mesh.rows
+        XCTAssertEqual(points.count, perEye * 2)
+        let middle = 1 * mesh.columns + 2
+        let left = points[middle]
+        let right = points[perEye + middle]
+        XCTAssertEqual(SIMD2(left.x, left.y), SIMD2(right.x, right.y))
+        XCTAssertEqual(right.z - left.z - 1.25, mesh[2, 1], accuracy: 0.0001)
+        let quads = mesh.layerQuads()
+        XCTAssertEqual(quads.count, (mesh.columns - 1) * (mesh.rows - 1) * 2 * 4)
+        XCTAssertEqual(Array(quads.prefix(4)), [0, 1, 6, 5])
+        XCTAssertTrue(quads.allSatisfy { Int($0) < points.count })
+    }
+}

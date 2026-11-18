@@ -79,3 +79,67 @@ NSString *VXREnableEncryptedMedia(WKPreferences *preferences) {
     NSString *legacy = VXRSetWebFeature(preferences, @"LegacyEncryptedMediaAPIEnabled", YES);
     return [NSString stringWithFormat:@"%@, %@", modern, legacy];
 }
+
+// Core Animation's private mesh transform. The layouts below match QuartzCore's
+// CAMeshVertex and CAMeshFace; a Mac check confirmed them.
+typedef struct {
+    CGFloat x, y, z;
+} VXRPoint3D;
+typedef struct {
+    CGPoint from;
+    VXRPoint3D to;
+} VXRMeshVertex;
+typedef struct {
+    unsigned int indices[4];
+    float w[4];
+} VXRMeshFace;
+
+NSString *VXRSetLayerMesh(CALayer *layer, const VXRMeshPoint *points, NSInteger pointCount, const uint32_t *quads,
+                          NSInteger quadCount) {
+    @try {
+        Class cls = NSClassFromString(@"CAMeshTransform");
+        SEL make = NSSelectorFromString(@"meshTransformWithVertexCount:vertices:faceCount:faces:depthNormalization:");
+        SEL set = NSSelectorFromString(@"setMeshTransform:");
+        if (!cls || ![cls respondsToSelector:make] || ![layer respondsToSelector:set]) {
+            return @"CAMeshTransform unavailable on this runtime";
+        }
+        if (pointCount <= 0 || quadCount <= 0) {
+            return @"Empty mesh";
+        }
+        NSMutableData *vertexData = [NSMutableData dataWithLength:sizeof(VXRMeshVertex) * (NSUInteger)pointCount];
+        NSMutableData *faceData = [NSMutableData dataWithLength:sizeof(VXRMeshFace) * (NSUInteger)quadCount];
+        VXRMeshVertex *vertices = vertexData.mutableBytes;
+        VXRMeshFace *faces = faceData.mutableBytes;
+        for (NSInteger index = 0; index < pointCount; index++) {
+            VXRMeshPoint point = points[index];
+            vertices[index].from = CGPointMake(point.fromX, point.fromY);
+            vertices[index].to = (VXRPoint3D){point.toX, point.toY, 0};
+        }
+        for (NSInteger index = 0; index < quadCount; index++) {
+            for (int corner = 0; corner < 4; corner++) {
+                uint32_t vertex = quads[index * 4 + corner];
+                if (vertex >= (uint32_t)pointCount) {
+                    return @"Mesh face points outside the mesh";
+                }
+                faces[index].indices[corner] = vertex;
+                faces[index].w[corner] = 0;
+            }
+        }
+        id mesh = ((id (*)(id, SEL, NSUInteger, VXRMeshVertex *, NSUInteger, VXRMeshFace *, NSString *))objc_msgSend)(
+            cls, make, (NSUInteger)pointCount, vertices, (NSUInteger)quadCount, faces, @"none");
+        if (!mesh) {
+            return @"CAMeshTransform refused the mesh";
+        }
+        ((void (*)(id, SEL, id))objc_msgSend)(layer, set, mesh);
+        return nil;
+    } @catch (NSException *exception) {
+        return [NSString stringWithFormat:@"Mesh exception: %@", exception.reason];
+    }
+}
+
+void VXRClearLayerMesh(CALayer *layer) {
+    SEL set = NSSelectorFromString(@"setMeshTransform:");
+    if ([layer respondsToSelector:set]) {
+        ((void (*)(id, SEL, id))objc_msgSend)(layer, set, nil);
+    }
+}
