@@ -30,6 +30,8 @@ final class NativeMediaRenderer {
     private let cache: CVMetalTextureCache
     private let loader: MTKTextureLoader
     private let inFlight = DispatchSemaphore(value: 2)
+    /// Draws 2D media as two eyes when 3D conversion is on.
+    private let warp: StereoWarpRenderer?
     private var sourceID: UUID?
     private var lastTime = CMTime.invalid
     private var content: Frame?
@@ -52,6 +54,7 @@ final class NativeMediaRenderer {
         descriptor.fragmentFunction = library.makeFunction(name: "mediaFragment")
         descriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
         pipeline = try device.makeRenderPipelineState(descriptor: descriptor)
+        warp = try? StereoWarpRenderer(device: device)
     }
 
     func clear() {
@@ -95,6 +98,10 @@ final class NativeMediaRenderer {
                         leftTexture: left, rightTexture: right, route: route), frame: session.decodedVideoFrames,
                     expectedStereo: true)
             } else {
+                let now = CACurrentMediaTime()
+                if session.conversion.wantsFrame(now: now, still: false) {
+                    session.conversion.submit(decoded.0, quarterTurns: session.quarterTurns, now: now)
+                }
                 let left = texture(decoded.0)
                 if let left {
                     content = Frame(left: left.0, right: nil, retained: [left.1], decodedBuffers: [decoded.0])
@@ -177,7 +184,7 @@ final class NativeMediaRenderer {
             return
         }
         let data = content
-        let parameters: Presentation
+        var parameters: Presentation
         if let comparison {
             parameters = Presentation(
                 settings: render.settings, stereo: render.stereo,
@@ -189,10 +196,19 @@ final class NativeMediaRenderer {
                 projection: session.projection, layout: session.arrangement, swapped: session.swapEyes,
                 turns: session.quarterTurns, safeArea: safeArea, eyePreview: session.stereoEyePreview)
         }
+        var left = comparison?.leftTexture ?? data?.left
+        var right = comparison == nil ? data?.right : comparison?.rightTexture
+        if comparison == nil, let source = data?.left, data?.right == nil,
+            let eyes = convertedEyes(session: session, source: source, command: command)
+        {
+            left = eyes.left
+            right = eyes.right
+            parameters.layout = .separateEyes
+            parameters.turns = 0
+        }
         guard
             encode(
-                command: command, pass: pass, size: view.drawableSize, left: comparison?.leftTexture ?? data?.left,
-                right: comparison == nil ? data?.right : comparison?.rightTexture,
+                command: command, pass: pass, size: view.drawableSize, left: left, right: right,
                 presentation: parameters)
         else {
             inFlight.signal()
@@ -207,6 +223,22 @@ final class NativeMediaRenderer {
         command.present(drawable)
         command.commit()
         isPresenting = ready
+    }
+
+    /// Both eyes of a 2D picture with depth added, or nil to draw it flat.
+    /// The eyes come back upright, so the caller draws them with no rotation.
+    private func convertedEyes(
+        session: NativeMediaSession, source: MTLTexture, command: MTLCommandBuffer
+    ) -> (left: MTLTexture, right: MTLTexture)? {
+        let conversion = session.conversion
+        let now = CACurrentMediaTime()
+        if let photo = session.photo?.0, conversion.wantsFrame(now: now, still: true) {
+            conversion.submit(photo, quarterTurns: session.quarterTurns, now: now)
+        }
+        guard let warp, let mesh = conversion.mesh(now: now) else {
+            return nil
+        }
+        return warp.encode(command: command, source: source, mesh: mesh, quarterTurns: session.quarterTurns)
     }
 
     struct Presentation {

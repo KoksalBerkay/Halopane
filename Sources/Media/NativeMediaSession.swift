@@ -22,7 +22,7 @@ final class NativeMediaSession: ObservableObject {
     @Published var stereoPresentation: StereoPresentationRoute = .image
     var usesFlatPhotoSurface: Bool {
         file?.kind == .image && projection == .flat && !roomScreen
-            && (arrangement == .mono || arrangement == .separateEyes)
+            && (arrangement == .mono || arrangement == .separateEyes) && !conversion.isActive
     }
     var usesLiveImagePresentation: Bool {
         detectedStereo && isMovie && projection == .flat && !roomScreen && arrangement == .separateEyes
@@ -53,9 +53,17 @@ final class NativeMediaSession: ObservableObject {
     @Published var projection: MediaProjection = .flat {
         didSet {
             recenter()
+            stopConversionIfUnsupported()
         }
     }
-    @Published var arrangement: MediaArrangement = .mono
+    @Published var arrangement: MediaArrangement = .mono {
+        didSet {
+            stopConversionIfUnsupported()
+        }
+    }
+    /// 2D-to-3D for flat 2D photos and videos.
+    let conversion = StereoConversion()
+    private var conversionChanges: AnyCancellable?
     @Published var swapEyes = false
     @Published var roomScreen = false {
         didSet {
@@ -108,6 +116,10 @@ final class NativeMediaSession: ObservableObject {
     }
 
     init() {
+        // The status line and the 3D button read conversion state through this session.
+        conversionChanges = conversion.objectWillChange.sink { [weak self] _ in
+            self?.objectWillChange.send()
+        }
         #if canImport(UIKit)
             backgroundObserver = NotificationCenter.default.addObserver(
                 forName: UIApplication.didEnterBackgroundNotification,
@@ -125,9 +137,14 @@ final class NativeMediaSession: ObservableObject {
     }
 
     func open(_ file: LocalPanelFile, autoplay: Bool = false) {
+        // 3D stays on from one item to the next until the viewer turns it off.
+        let keepsConversion = conversion.isActive
         close()
         guard file.kind != .document else {
             return
+        }
+        if keepsConversion {
+            conversion.start()
         }
         let format = MediaFormat.inferred(from: file.sourceName)
         projection = format.projection
@@ -323,6 +340,9 @@ final class NativeMediaSession: ObservableObject {
         }
         if arrangement != .mono && !stereo {
             return "Switch the glasses to 3D mode for both eyes."
+        }
+        if let hint = conversionHint(stereo: stereo) {
+            return hint
         }
         if isMovie && !playing {
             return "Paused · Tap the phone surface to play"
@@ -522,6 +542,7 @@ final class NativeMediaSession: ObservableObject {
         }
         diagnostics.finish()
         endComparison()
+        conversion.stop()
         checkingFrame = false
         diagnosticStatus = ""
         decodedVideoFrames = 0

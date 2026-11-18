@@ -21,6 +21,7 @@ struct NativeMediaControls: View {
                 }
             }.pickerStyle(.segmented)
             layoutRow
+            DepthControlsRow(conversion: session.conversion)
             GeometryReader { geometry in
                 touchSurface(width: geometry.size.width)
             }.frame(minHeight: 100)
@@ -87,6 +88,13 @@ struct NativeMediaControls: View {
                     .padding(.horizontal, 10).frame(height: 44)
             }.buttonStyle(ControllerButtonStyle())
             Spacer(minLength: 0)
+            if session.canConvertTo3D || session.conversion.isActive {
+                Convert3DButton(conversion: session.conversion) {
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        session.toggleConversion()
+                    }
+                }
+            }
             if session.projection == .flat {
                 Button {
                     session.roomScreen.toggle()

@@ -15,5 +15,6 @@ swiftc "${module[@]}" \
   Sources/Media/NativeMediaSession.swift Sources/Media/MediaLoading.swift Sources/Media/NativeMediaRenderer.swift \
   Sources/Media/NativeMediaDiagnostics.swift Sources/Media/StereoTrackReader.swift Sources/Media/LocalPanelFile.swift \
   Sources/App/WorldRenderer.swift \
+  Sources/Depth/{DepthEstimator,StereoConversion,StereoWarpRenderer,NativeMediaConversion}.swift \
   Verification/NativeMediaSmoke.swift -o "$harness_dir/native-media-smoke"
 "$harness_dir/native-media-smoke" "$@"
