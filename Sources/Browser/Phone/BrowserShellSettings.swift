@@ -191,7 +191,7 @@ extension BrowserShell {
                 """
                 For testing and development. Spatial decoder picks how Spatial Player decodes stereo video. \
                 MediaSource lets desktop players such as Netflix stream; it applies on the next page load. Copying the \
-                right eye as one picture keeps both eyes identical in 3D mode; turn it off if the glasses stutter. \
+                right eye as one picture fixes pages that show images in only one eye in 3D mode, such as Pluto TV. \
                 The cloud gaming profiles choose which version of each service loads; Web app supports paired \
                 controllers. \
                 The lab compares rendering paths and input delivery.

@@ -139,10 +139,11 @@ final class Workspace: ObservableObject {
     }
     /// Draws the right eye from the same picture as the left instead of redrawing
     /// the left eye's layers. Some pages, such as Pluto TV's catalogue, lose their
-    /// images in a redrawn copy. On unless the user turns it off.
-    @Published var meshEyeCopy = UserDefaults.standard.object(forKey: "viture.glasses.meshEyeCopy") as? Bool ?? true {
+    /// images in a redrawn copy. Off unless the user turns it on: the copy can look
+    /// softer, and only a few pages need it.
+    @Published var meshEyeCopy = UserDefaults.standard.bool(forKey: "viture.glasses.eyeCopyAsOnePicture") {
         didSet {
-            UserDefaults.standard.set(meshEyeCopy, forKey: "viture.glasses.meshEyeCopy")
+            UserDefaults.standard.set(meshEyeCopy, forKey: "viture.glasses.eyeCopyAsOnePicture")
         }
     }
     @Published var searchEngine =

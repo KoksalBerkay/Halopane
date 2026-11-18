@@ -4,7 +4,7 @@
 
 - One-tap 2D-to-3D. Tap **3D** in the playback controls to add depth to web video, or in Spatial Player for 2D photos and videos. Depth is estimated on the iPhone with the bundled Depth Anything V2 Small model. A Depth slider and a Pop-out switch tune the effect live. Protected video stays 2D with an explanation.
 - Hold **3D** for video that already holds two eye views (side by side or half side by side).
-- In 3D mode the right eye shows the same picture as the left, so pages such as Pluto TV's catalogue no longer lose their images in one eye. **Settings → Advanced → Copy the right eye as one picture** turns this off.
+- **Settings → Advanced → Copy the right eye as one picture** fixes pages that show images in only one eye in 3D mode, such as Pluto TV's catalogue. It is off by default.
 - JPEG photos and panoramas in Spatial Player keep their colours instead of turning blue, and 10-bit and 16-bit photos open.
 
 ## 0.1.1 (2026-11-18)

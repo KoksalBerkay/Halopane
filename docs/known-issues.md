@@ -27,6 +27,7 @@ Halopane has been tested on one setup: VITURE Luma Ultra, VITURE USB-C XR Chargi
 
 ## Websites
 
+- **Images in only one eye in 3D mode.** Some pages, such as Pluto TV's catalogue, show their images to the left eye only. Turn on **Settings → Advanced → Copy the right eye as one picture**. It is off by default because it can make the picture slightly softer.
 - **Sign-in:** some sites need you to sign in on the phone screen. Halopane offers this when it detects it.
 - **Embedded players** and third-party sign-in windows vary from site to site.
 - **Office documents:** previews can change the layout. Use a PDF export when layout matters.
