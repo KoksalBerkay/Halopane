@@ -9,7 +9,9 @@ extension BrowserShell {
     var controller: some View {
         VStack(spacing: 8) {
             trackpad
-            bottomStrip.frame(height: typing ? 44 : 96)
+            DepthStripFrame(conversion: browser.conversion, typing: typing) {
+                bottomStrip
+            }
         }
         .padding(.horizontal, 10).padding(.top, 8)
         .onChange(of: browser.popup != nil) {

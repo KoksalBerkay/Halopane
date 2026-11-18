@@ -103,3 +103,17 @@ struct ConversionHint: View {
         return nil
     }
 }
+
+/// Gives the phone's bottom strip room for the depth row and status line while
+/// 3D is on. A fixed height would push them out of view.
+struct DepthStripFrame<Content: View>: View {
+    @ObservedObject var conversion: StereoConversion
+    let typing: Bool
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        content
+            .frame(height: typing ? 44 : (conversion.isActive ? 158 : 96))
+            .animation(.easeOut(duration: 0.2), value: conversion.isActive)
+    }
+}
