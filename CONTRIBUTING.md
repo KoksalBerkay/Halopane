@@ -33,6 +33,7 @@ Keep each pull request to one topic. Small pull requests get reviewed quickly; l
   ./Verification/web-texture-smoke.sh   # run after webkit-smoke; uses its snapshot
   ./Verification/render-preview.sh      # 3D scene and pointer in Metal
   ./Verification/native-media-smoke.sh  # Spatial Player decoding and routing
+  ./Verification/depth-3d-smoke.sh      # 2D-to-3D: depth model, mesh and stereo warp
   ./Verification/ad-blocking-smoke.sh   # filter rules in WebKit
   node Verification/catalog-scroll.cjs  # GeForce NOW scrolling
   node Verification/shorts-scroll.cjs   # YouTube Shorts scrolling

@@ -24,6 +24,7 @@ Each screen is a full browser, and your iPhone is the remote for all of it. Slid
 - 🖥️ **Work across several screens at once.** Up to four screens pinned around you, each a full browser. Look between them by turning your head, or make one fill your view. Recenter brings the whole workspace back in front of you.
 - 📱 **Control it all with the phone in your hand.** Use it as a trackpad (slide, tap, two fingers to scroll, two-finger tap to right-click), or aim it at a screen like a laser pointer. Gaze + tap is experimental. The phone is also your keyboard and your playback remote. The web page normally stays in the glasses. The phone also shows settings, pickers and some sign-in pages.
 - 🎬 **Watch video properly.** Fill your view with supported web video, or choose a 3D layout for video that already contains two eye views.
+- ✨ **Turn 2D into 3D with one tap.** Web videos, photos and local videos get depth estimated on the iPhone, so ordinary content gains real stereo depth. Protected streams stay 2D.
 - 🥽 **Relive your own spatial media.** Apple spatial photos and videos in real stereo, side-by-side 3D, and 180° or 360° video you look around in, opened straight from Photos or Files.
 - 🎮 **Play cloud games.** Xbox Cloud Gaming and GeForce NOW with a paired controller.
 - 🛡️ **Block ads your way.** A built-in list based on EasyList, plus your own filter lists and rules, managed in the app.
@@ -74,7 +75,7 @@ Tried a different setup? Please open an issue and say what happened, whether it 
 4. Press **+** to add another screen, then turn your head to look at it.
 5. Press the Full Screen button to make the current screen fill your view.
 
-The [guide](docs/guide.md) covers video, 3D, Spatial Player and ad blocking.
+The [guide](docs/guide.md) covers video, 3D, 2D-to-3D, Spatial Player and ad blocking.
 
 ## 📊 Status
 
@@ -87,6 +88,7 @@ Halopane is early software made by one person. This is what to expect today.
 | Web video and Video view | ✅ Works on tested sites |
 | Protected streaming (FairPlay) | 🟡 Works on Pluto TV and Plex; subscription services untested |
 | Packed 3D in the browser | 🟡 Available; needs more device testing |
+| 2D-to-3D conversion | 🧪 New; needs device testing |
 | Apple spatial photos and videos | ✅ Flat playback tested in Spatial Player |
 | Local 180° and 360° video | 🟡 Available; needs more device testing |
 | Xbox Cloud Gaming, GeForce NOW | ✅ Works with a controller |
@@ -136,9 +138,10 @@ Harnesses that exercise WebKit, Metal and media decoding on the Mac live in `Ver
 | `Sources/Browser/Web/` | Search, video, files, Home shortcuts, cloud gaming |
 | `Sources/AdBlocking/` | Ad blocking lists and settings |
 | `Sources/Media/` | Spatial Player for local photos and videos |
+| `Sources/Depth/` | 2D-to-3D: depth model, conversion state, stereo drawing and capture |
 | `Sources/Diagnostics/` | Input and rendering experiments |
 | `Sources/PrivateWebPortal/` | Objective-C bridge to private iOS touch and view interfaces |
-| `Resources/` | Home page, injected page scripts, bundled filter rules |
+| `Resources/` | Home page, injected page scripts, bundled filter rules, depth model |
 | `Verification/` | Mac test harnesses |
 | `docs/` | Guide, known issues, adapter protocol notes |
 

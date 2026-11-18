@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- One-tap 2D-to-3D. Tap **3D** in the playback controls to add depth to web video, or in Spatial Player for 2D photos and videos. Depth is estimated on the iPhone with the bundled Depth Anything V2 Small model. A Depth slider and a Pop-out switch tune the effect live. Protected video stays 2D with an explanation.
+- Hold **3D** for video that already holds two eye views (side by side or half side by side).
+
 ## 0.1.1 (2026-11-18)
 
 - YouTube opens as the desktop site. The mobile site kept loading posts and moving the page at the glasses' screen size. A saved choice for YouTube is kept.
