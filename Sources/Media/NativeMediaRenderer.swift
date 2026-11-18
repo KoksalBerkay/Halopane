@@ -72,12 +72,7 @@ final class NativeMediaRenderer {
         }
         if !triedPhoto, let photo = session.photo {
             triedPhoto = true
-            if let left = ImageTexture.make(photo.0, device: device) {
-                let right = photo.1.flatMap {
-                    ImageTexture.make($0, device: device)
-                }
-                content = Frame(left: left, right: right, retained: [], decodedBuffers: [])
-            }
+            uploadPhoto(photo, for: session.renderID)
         } else if let decoded = session.sample(hostTime: time, after: lastTime) {
             lastTime = decoded.2
             if session.detectedStereo {
@@ -111,6 +106,24 @@ final class NativeMediaRenderer {
             }
         }
         return content != nil
+    }
+
+    // A large photo takes a moment to convert. Doing it here instead of in the
+    // display loop keeps the glasses, and head tracking, from freezing meanwhile.
+    private func uploadPhoto(_ photo: (CGImage, CGImage?), for id: UUID) {
+        let device = device
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            let left = ImageTexture.make(photo.0, device: device)
+            let right = photo.1.flatMap {
+                ImageTexture.make($0, device: device)
+            }
+            DispatchQueue.main.async {
+                guard let self, self.sourceID == id, let left else {
+                    return
+                }
+                self.content = Frame(left: left, right: right, retained: [], decodedBuffers: [])
+            }
+        }
     }
 
     func snapshotEye(_ buffer: CVPixelBuffer) -> MTLTexture? {
