@@ -19,7 +19,9 @@ struct WebKitSmoke {
         func layout(_ url: URL, preferDesktop: Bool = false) -> BrowserDestination.WebsiteLayout {
             BrowserDestination.websiteLayout(url, overrides: settings, preferDesktop: preferDesktop)
         }
-        precondition(layout(mobile).toggleTitle == "Use desktop site")
+        // YouTube opens as the desktop site unless the viewer chose otherwise.
+        precondition(layout(mobile).contentMode == .desktop)
+        precondition(layout(mobile).toggleTitle == "Use mobile site")
         settings[BrowserDestination.layoutPreferenceHost(mobile)!] = true
         precondition(layout(desktop).contentMode == .desktop)
         precondition(layout(desktop).toggleTitle == "Use mobile site")
@@ -31,7 +33,7 @@ struct WebKitSmoke {
         precondition(layout(desktop).contentMode == .desktop)
         let lookalike = URL(string: "https://m.youtube.com.example/")!
         precondition(layout(lookalike).contentMode == .recommended)
-        print("Website layout verified: YouTube redirects, toggle labels, and saved site preferences")
+        print("Website layout verified: YouTube desktop default, toggle labels, and saved site preferences")
     }
     final class Runner: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         let web: WKWebView
@@ -252,15 +254,22 @@ struct WebKitSmoke {
                 if (!vxrPanelMute() || !video.muted) return false;
                 if (!(await vxrMediaCommand(id,'muteAndPlay',0)) || video.paused || !video.muted) return false;
                 if (!(await vxrMediaCommand(id,'unmute',0)) || video.muted) return false;
-                return true;
+                // 2D-to-3D frame grab: a small JPEG, or a known reason it cannot read the video.
+                if (vxrMediaFrame(id + 1000,64).error !== 'gone') return false;
+                const frame = vxrMediaFrame(id,64);
+                if (frame.image) {
+                    return frame.image.startsWith('data:image/jpeg') ? 'image' : false;
+                }
+                return frame.error === 'crossOrigin' ? 'crossOrigin' : false;
                 """, arguments: ["id": id], in: nil, in: mediaWorld
             ) { result in
-                guard case .success(let value) = result, value as? Bool == true else {
+                guard case .success(let value) = result, let frame = value as? String else {
                     self.finish("Media controls failed: \(result)", code: 1)
                     return
                 }
                 print(
-                    "Media script verified: fullscreen redirect, play/pause, mute, seek, frame mute, and muted resume")
+                    "Media script verified: fullscreen redirect, play/pause, mute, seek, frame mute, muted resume, "
+                        + "and 3D frame grab (\(frame))")
                 self.verifySecondaryClick()
             }
         }
