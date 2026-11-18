@@ -37,10 +37,11 @@ Halopane works without a vendor SDK.
 - **Live web pages, not a mirrored screen.** Each screen hosts a live WebKit page. As you move your head, the display updates its perspective. In side-by-side mode, ordinary browser content is duplicated for the other eye.
 - **A pointer that reaches into the glasses.** The pages you see are not on a touchscreen, so Halopane maps phone input to the page in the glasses. Support for page controls and text entry depends on the site.
 - **True stereo playback.** Apple spatial video is decoded as two separate eye views and sent to the matching eye. 180° and 360° video is reprojected live as you look around.
+- **2D-to-3D on the phone.** A depth model on the iPhone's Neural Engine estimates depth about 15 times a second, and each eye's picture is shifted by it. Web video stays live while this happens.
 - **Everything on the phone.** Tracking, rendering, browsing and decoding all run on the iPhone. You need a Mac to build from source.
 - **A filter-list converter on the device.** Standard ad-block lists are converted on the phone into the format iOS understands, so you can bring your own.
 
-Automated tests cover geometry, input routing, filter conversion and adapter packets. The Mac checks exercise WebKit, Metal and media decoding. Testing the glasses and sideloading still takes an iPhone.
+Automated tests cover geometry, input routing, filter conversion, depth and adapter packets. The Mac checks exercise WebKit, Metal, media decoding and the depth model. Testing the glasses and sideloading still takes an iPhone.
 
 ## 🧰 What you need
 
@@ -88,7 +89,7 @@ Halopane is early software made by one person. This is what to expect today.
 | Web video and Video view | ✅ Works on tested sites |
 | Protected streaming (FairPlay) | 🟡 Works on Pluto TV and Plex; subscription services untested |
 | Packed 3D in the browser | 🟡 Available; needs more device testing |
-| 2D-to-3D conversion | 🧪 New; needs device testing |
+| 2D-to-3D conversion | ✅ Works on YouTube, Plex and local photos and videos; protected streams stay 2D |
 | Apple spatial photos and videos | ✅ Flat playback tested in Spatial Player |
 | Local 180° and 360° video | 🟡 Available; needs more device testing |
 | Xbox Cloud Gaming, GeForce NOW | ✅ Works with a controller |

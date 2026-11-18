@@ -14,8 +14,8 @@ Halopane has been tested on one setup: VITURE Luma Ultra, VITURE USB-C XR Chargi
 
 ## 2D-to-3D
 
-- **New and needs device testing.** If 3D does not appear, or only one eye shows the video, attach the report from **Settings → Troubleshooting → Share report**. It includes a "2D to 3D" line with what happened.
-- **Protected video stays 2D.** FairPlay video, as on Netflix or Disney+, can't be read by apps, so its depth can't be estimated.
+- **Tested on YouTube, Plex and local photos and videos.** Other sites have not been tried yet. If 3D does not appear on one, or only one eye shows the video, attach the report from **Settings → Troubleshooting → Share report**. It includes a "2D to 3D" line with what happened.
+- **Protected video stays 2D.** FairPlay video, as on Pluto TV's movies, Netflix or Disney+, can't be read by apps, so its depth can't be estimated. Halopane says so instead of converting.
 - **Depth is estimated, not measured.** Scenes with people, landscapes and objects work best. Text, cartoons and on-screen graphics can look flat or slightly bent. Lower **Depth** if something looks wrong.
 - **Edges of near objects stretch slightly.** Halopane moves the picture instead of inventing the hidden background, so a thin stretched band can appear beside close objects. Lower **Depth** to make it smaller.
 - **The first start takes a few seconds** while the system prepares the depth model for this iPhone.
