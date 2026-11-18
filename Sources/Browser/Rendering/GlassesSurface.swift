@@ -18,6 +18,8 @@ final class GlassesSurface: UIView {
     var left = UIView(), right = UIView(), source = UIView()
     var portal: UIView?
     var replica: ReplicatorHost?
+    /// Whether the right eye is currently copied with a mesh; nil before the first frame.
+    var appliedMeshEyeCopy: Bool?
     var metal: MTKView?
     var renderer: WebSnapshotRenderer?
     var dots = [UIView]()
@@ -138,6 +140,7 @@ final class GlassesSurface: UIView {
         {
             configure()
         }
+        updateEyeCopy()
         let frame = browser.panelRelativeFrame(frame, now: CACurrentMediaTime())
         browser.updateWorkspacePointer(frame)
         if workspaceRendering {

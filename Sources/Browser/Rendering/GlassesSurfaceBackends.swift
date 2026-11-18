@@ -9,6 +9,7 @@ extension GlassesSurface {
     // A replicator layer draws the left view a second time for the right eye.
     func configureReplica(wide: Bool, eyeWidth: CGFloat) {
         let host = ReplicatorHost(frame: bounds)
+        appliedMeshEyeCopy = nil
         let layer = host.layer as! CAReplicatorLayer
         layer.instanceCount = wide ? 2 : 1
         layer.instanceTransform = CATransform3DMakeTranslation(eyeWidth, 0, 0)

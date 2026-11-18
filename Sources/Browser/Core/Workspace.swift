@@ -137,6 +137,14 @@ final class Workspace: ObservableObject {
             UserDefaults.standard.set(desktopMediaSource, forKey: "viture.browser.desktopMediaSource")
         }
     }
+    /// Draws the right eye from the same picture as the left instead of redrawing
+    /// the left eye's layers. Some pages, such as Pluto TV's catalogue, lose their
+    /// images in a redrawn copy. On unless the user turns it off.
+    @Published var meshEyeCopy = UserDefaults.standard.object(forKey: "viture.glasses.meshEyeCopy") as? Bool ?? true {
+        didSet {
+            UserDefaults.standard.set(meshEyeCopy, forKey: "viture.glasses.meshEyeCopy")
+        }
+    }
     @Published var searchEngine =
         BrowserSearchEngine(
             rawValue: UserDefaults.standard.string(
