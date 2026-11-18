@@ -17,6 +17,10 @@ The synthetic gesture code includes material adapted from KIF, distributed
 under Apache License 2.0. See ThirdParty/KIF-NOTICE.txt and
 ThirdParty/Apache-2.0.txt.
 
+The 2D-to-3D conversion uses the Depth Anything V2 Small model by Lihe Yang et
+al., in Apple's Core ML conversion, distributed unchanged under Apache License
+2.0. See ThirdParty/Depth-Anything-V2-NOTICE.md and ThirdParty/Apache-2.0.txt.
+
 Home includes artwork from Simple Icons. Other shortcut artwork is fetched
 from its publisher on the user's device and is not distributed with Halopane.
 See ThirdParty/Home-Icons-NOTICE.md.
