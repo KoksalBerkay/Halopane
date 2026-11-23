@@ -10,7 +10,7 @@ Halopane has been tested on one setup: VITURE Luma Ultra, VITURE USB-C XR Chargi
 
 - **YouTube 360° videos do not work.** YouTube refuses 360° playback in the browser Halopane uses. Spatial Player has separate View settings for local 180° and 360° files.
 - **Panoramic playback needs more device testing.** Flat playback of spatial photos and videos has been tested. If a panoramic file looks wrong, try a different View or Layout in the player.
-- **Protected video depends on the service.** Video protected with Apple FairPlay plays (tested with Pluto TV and Plex). Services that only offer Widevine or PlayReady cannot play in any iPhone browser. Netflix, HBO Max and other subscription services have not been tested yet. If one refuses to play, see [Streaming services](guide.md#streaming-services).
+- **Protected video depends on the service.** Video protected with Apple FairPlay plays (tested with Pluto TV, Plex and TV+ from Turkcell). Services that only offer Widevine or PlayReady cannot play in any iPhone browser. Netflix, HBO Max and most other subscription services have not been tested yet. If one refuses to play, see [Streaming services](guide.md#streaming-services).
 
 ## 2D-to-3D
 

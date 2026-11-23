@@ -52,7 +52,7 @@ For a video that already packs two eye views into one frame, hold **3D** in the 
 
 ### Streaming services
 
-Services that protect video with Apple FairPlay can play, the same way they do in Safari. Halopane already presents itself as Safari to known streaming sites, and opens Netflix, Disney+, Hulu, Prime Video and Peacock as desktop sites. If another service says your browser is not supported or the video never starts, open the screen's toolbar menu and try **Identify as Safari**, then **Use desktop site**. Both are remembered per site.
+Services that protect video with Apple FairPlay can play, the same way they do in Safari. Halopane already presents itself as Safari to known streaming sites, and opens Netflix, Disney+, Hulu, Prime Video, Peacock and TV+ (Turkcell) as desktop sites. If another service says your browser is not supported or the video never starts, open the screen's toolbar menu and try **Identify as Safari**, then **Use desktop site**. Both are remembered per site.
 
 ## 🗂️ Open Photos or Files
 

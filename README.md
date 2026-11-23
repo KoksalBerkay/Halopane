@@ -87,7 +87,7 @@ Halopane is early software made by one person. This is what to expect today.
 | Multi-screen workspace with 3DoF head tracking | ✅ Works |
 | Phone trackpad and keyboard | ✅ Works |
 | Web video and Video view | ✅ Works on tested sites |
-| Protected streaming (FairPlay) | 🟡 Works on Pluto TV and Plex; subscription services untested |
+| Protected streaming (FairPlay) | 🟡 Works on Pluto TV, Plex and TV+ (Turkcell); other subscription services untested |
 | Packed 3D in the browser | 🟡 Available; needs more device testing |
 | 2D-to-3D conversion | ✅ Works on YouTube, Plex and local photos and videos; protected streams stay 2D |
 | Apple spatial photos and videos | ✅ Flat playback tested in Spatial Player |

@@ -1,8 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 (2026-11-23)
 
 - TV+ (tvplus.com.tr) opens as the desktop site and sees Mac Safari, so it no longer asks for a supported browser or sends playback to its mobile app. Its player controls now hide after a few seconds, as they do with a mouse.
+- The diagnostics report keeps the last errors from streaming pages, with addresses and IDs removed, so silent playback failures can be traced.
 
 ## 0.2.0 (2026-11-18)
 
