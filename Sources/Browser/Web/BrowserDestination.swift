@@ -139,6 +139,57 @@ enum XWebCompatibility {
     /// its deviceType cookie for a year and sends playback to its app. A real Mac has no
     /// touch points, so pages shown as Mac Safari there report none. A saved non-desktop
     /// type is reset once, since the site never replaces it.
+    /// Keeps the last page errors on streaming sites for the diagnostics report. Players
+    /// often catch their own failures and show nothing. Addresses and long IDs are removed.
+    static var pageErrorScript: String {
+        let domains = streamingDomains.sorted().map { "'\($0)'" }.joined(separator: ", ")
+        return """
+            (() => {
+                const host = location.hostname;
+                if (![\(domains)].some(domain => host === domain || host.endsWith('.' + domain))) {
+                    return;
+                }
+                const log = window.__vxrPageErrors = [];
+                const clean = value => {
+                    let text;
+                    try {
+                        text = value instanceof Error ? value.name + ': ' + value.message : String(value);
+                        if (text === '[object Object]') {
+                            text = JSON.stringify(value);
+                        }
+                    } catch (error) {
+                        text = typeof value;
+                    }
+                    return text.replace(/(https?|blob|data):[^\\s'"]+/g, '<url>')
+                        .replace(/[A-Za-z0-9+/=_-]{32,}/g, '<id>').slice(0, 160);
+                };
+                const add = (kind, values) => {
+                    log.push(Math.round(performance.now()) + ' ' + kind + ': ' + values.map(clean).join(' '));
+                    if (log.length > 12) {
+                        log.shift();
+                    }
+                };
+                for (const kind of ['error', 'warn']) {
+                    const original = console[kind];
+                    console[kind] = function (...values) {
+                        add(kind, values);
+                        return original.apply(this, values);
+                    };
+                }
+                addEventListener('error', event => {
+                    if (event.target instanceof HTMLMediaElement) {
+                        add('media', [event.target.error?.code, event.target.error?.message]);
+                    } else if (event.error || event.message) {
+                        add('uncaught', [event.error || event.message]);
+                    }
+                }, true);
+                addEventListener('unhandledrejection', event => {
+                    add('rejection', [event.reason]);
+                });
+            })()
+            """
+    }
+
     static let macTouchScript = """
         (() => {
             const host = location.hostname;

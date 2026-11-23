@@ -240,6 +240,7 @@ extension BrowserScreen {
                 },
                 agent: (navigator.userAgent.includes('Macintosh') ? 'mac' : 'mobile') +
                     (navigator.userAgent.includes(' Safari/') ? ' safari' : ''),
+                pageErrors: window.__vxrPageErrors,
                 ...(window.__vxrMetrics ? window.__vxrMetrics() : {
                     scrollY: scrollY,
                     video: [...document.querySelectorAll('video')].map(v => ({
