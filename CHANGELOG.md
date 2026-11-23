@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- TV+ (tvplus.com.tr) opens as the desktop site and sees Mac Safari, so it no longer asks for a supported browser or sends playback to its mobile app.
+- TV+ (tvplus.com.tr) opens as the desktop site and sees Mac Safari, so it no longer asks for a supported browser or sends playback to its mobile app. Its player controls now hide after a few seconds, as they do with a mouse.
 
 ## 0.2.0 (2026-11-18)
 

@@ -135,10 +135,6 @@ enum XWebCompatibility {
         "dazn.com", "skyshowtime.com", "tv.apple.com", "tvplus.com.tr"
     ]
 
-    /// TV+ (Turkcell) reads a Mac agent with touch points as an iPad, saves "tablet" in
-    /// its deviceType cookie for a year and sends playback to its app. A real Mac has no
-    /// touch points, so pages shown as Mac Safari there report none. A saved non-desktop
-    /// type is reset once, since the site never replaces it.
     /// Keeps the last page errors on streaming sites for the diagnostics report. Players
     /// often catch their own failures and show nothing. Addresses and long IDs are removed.
     static var pageErrorScript: String {
@@ -190,7 +186,13 @@ enum XWebCompatibility {
             """
     }
 
-    static let macTouchScript = """
+    /// Fixes for TV+ (Turkcell) when it is shown as Mac Safari.
+    /// - It reads a Mac agent with touch points as an iPad, saves "tablet" in its deviceType
+    ///   cookie for a year and sends playback to its app. A real Mac has no touch points, so
+    ///   none are reported, and a saved non-desktop type is reset once.
+    /// - Its player controls stay shown while a control is hovered. A tap gives the page a
+    ///   mouse enter but never a leave, so the controls never hid. The leave is sent after the tap.
+    static let tvPlusScript = """
         (() => {
             const host = location.hostname;
             if (host !== 'tvplus.com.tr' && !host.endsWith('.tvplus.com.tr')) {
@@ -200,6 +202,16 @@ enum XWebCompatibility {
                 return;
             }
             Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 0, configurable: true });
+            addEventListener('touchend', event => {
+                const target = event.target;
+                setTimeout(() => {
+                    if (target instanceof Element && target.isConnected) {
+                        target.dispatchEvent(new MouseEvent('mouseout', {
+                            bubbles: true, cancelable: true, view: window, relatedTarget: document.documentElement
+                        }));
+                    }
+                }, 400);
+            }, { capture: true, passive: true });
             const saved = document.cookie.match(/(?:^|; )deviceType=([^;]*)/);
             if (!saved || saved[1] === 'desktop') {
                 return;
