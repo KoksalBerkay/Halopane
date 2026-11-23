@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- TV+ (tvplus.com.tr) opens as the desktop site and sees Mac Safari, so it no longer asks for a supported browser or sends playback to its mobile app.
+
 ## 0.2.0 (2026-11-18)
 
 - One-tap 2D-to-3D. Tap **3D** in the playback controls to add depth to web video, or in Spatial Player for 2D photos and videos. Depth is estimated on the iPhone with the bundled Depth Anything V2 Small model. A Depth slider and a Pop-out switch tune the effect live. Protected video stays 2D with an explanation.

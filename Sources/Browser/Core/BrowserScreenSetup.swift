@@ -214,5 +214,13 @@ extension BrowserScreen {
 
     static func browserScripts(media: BrowserMedia, scrollWorld: WKContentWorld) -> [WKUserScript] {
         media.makeUserScripts() + trackpadScripts(in: scrollWorld) + phoneEditorScripts() + selectPickerScripts()
+            + [macTouchScript()]
+    }
+
+    // Runs in the page world so the site sees the changed touch count.
+    private static func macTouchScript() -> WKUserScript {
+        WKUserScript(
+            source: XWebCompatibility.macTouchScript, injectionTime: .atDocumentStart, forMainFrameOnly: true,
+            in: .page)
     }
 }

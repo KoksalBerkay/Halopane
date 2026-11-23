@@ -61,6 +61,9 @@ enum LogicTests {
         {
             check(layout(address) == .desktop, "\(address) opens as the desktop site")
         }
+        check(layout("https://tvplus.com.tr/") == .desktop, "TV+ opens as the desktop site")
+        check(agent("https://tvplus.com.tr/izle/1", true)?.contains("Macintosh") == true, "TV+ desktop gets Mac Safari")
+        check(agent("https://tvplus.com.tr.example/", true) == nil, "a TV+ lookalike is not matched")
         check(layout("https://pluto.tv/") == .recommended, "Pluto keeps the mobile route")
         check(layout("https://play.hbomax.com/") == .recommended, "HBO Max keeps the mobile route for now")
         check(

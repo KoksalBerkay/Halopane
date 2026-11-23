@@ -132,8 +132,37 @@ enum XWebCompatibility {
     private static let streamingDomains: Set<String> = [
         "pluto.tv", "hbomax.com", "max.com", "plex.tv", "tubi.tv", "disneyplus.com", "primevideo.com",
         "paramountplus.com", "peacocktv.com", "hulu.com", "netflix.com", "crunchyroll.com", "mubi.com",
-        "dazn.com", "skyshowtime.com", "tv.apple.com"
+        "dazn.com", "skyshowtime.com", "tv.apple.com", "tvplus.com.tr"
     ]
+
+    /// TV+ (Turkcell) reads a Mac agent with touch points as an iPad, saves "tablet" in
+    /// its deviceType cookie for a year and sends playback to its app. A real Mac has no
+    /// touch points, so pages shown as Mac Safari there report none. A saved non-desktop
+    /// type is reset once, since the site never replaces it.
+    static let macTouchScript = """
+        (() => {
+            const host = location.hostname;
+            if (host !== 'tvplus.com.tr' && !host.endsWith('.tvplus.com.tr')) {
+                return;
+            }
+            if (!navigator.userAgent.includes('Macintosh')) {
+                return;
+            }
+            Object.defineProperty(Navigator.prototype, 'maxTouchPoints', { get: () => 0, configurable: true });
+            const saved = document.cookie.match(/(?:^|; )deviceType=([^;]*)/);
+            if (!saved || saved[1] === 'desktop') {
+                return;
+            }
+            document.cookie = 'deviceType=desktop; path=/; max-age=31536000; secure';
+            try {
+                if (!sessionStorage.getItem('vxrDeviceTypeReset')) {
+                    sessionStorage.setItem('vxrDeviceTypeReset', '1');
+                    location.reload();
+                }
+            } catch (error) {
+            }
+        })()
+        """
 
     static func isStreaming(_ host: String) -> Bool {
         streamingDomains.contains { host == $0 || host.hasSuffix("." + $0) }
@@ -247,7 +276,7 @@ extension BrowserDestination {
     // at the panel size, so YouTube opens as the desktop site too.
     static let desktopProfileHosts: Set<String> = [
         "xbox.com", "play.geforcenow.com", "luna.amazon.com", "netflix.com", "disneyplus.com", "hulu.com",
-        "primevideo.com", "peacocktv.com", "youtube.com"
+        "primevideo.com", "peacocktv.com", "youtube.com", "tvplus.com.tr"
     ]
 }
 
